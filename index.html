@@ -686,44 +686,6 @@
       }
     }
 
-    function mostrarAcciones() {
-  const contenedor = document.getElementById("acciones-contenedor");
-  contenedor.innerHTML = "";
-
-  if (datosActuales && datosActuales.acciones && datosActuales.acciones.length > 0) {
-    datosActuales.acciones.forEach((accion) => {
-      const card = document.createElement("div");
-      card.className = "accion-card";
-
-      const diasDesdeAccion = calcularTiempoTranscurrido(accion.fecha);
-      const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
-      const entidadPrincipal = datosActuales.entidades.find(e => e.id === accion.entidades_relacionadas[0]);
-      const entidadSecundaria = datosActuales.entidades.find(e => e.id === accion.entidades_relacionadas[1]);
-
-      card.innerHTML = `
-        <div class="accion-fecha">${diasDesdeAccion}</div>
-        <div><strong>${accion.tipo_accion}</strong> por <strong>${conflicto ? conflicto.titulo : 'Conflicto no especificado'}</strong></div>
-        <div>${entidadPrincipal ? entidadPrincipal.nombre : 'Parte no especificada'} ${entidadSecundaria ? `y ${entidadSecundaria.nombre}` : ''}</div>
-      `;
-
-      contenedor.appendChild(card);
-    });
-  } else {
-    contenedor.innerHTML = "<p>No hay acciones registradas.</p>";
-  }
-}
-
-function calcularTiempoTranscurrido(fecha) {
-  const ahora = new Date();
-  const fechaAccion = new Date(fecha);
-  const diferenciaEnMilisegundos = ahora - fechaAccion;
-  const diferenciaEnDias = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24));
-
-  if (diferenciaEnDias === 0) return "hoy";
-  if (diferenciaEnDias === 1) return "hace 1 día";
-  return `hace ${diferenciaEnDias} días`;
-}
-
     function mostrarFormularioConflicto(id = null) {
       const formulario = document.getElementById("formulario-conflicto");
 
@@ -1148,7 +1110,52 @@ function calcularTiempoTranscurrido(fecha) {
       alert("Conflicto eliminado con éxito.");
     }
 
-    https://github.com/CarlosDimare/DECLASE/edit/main/index.html#L3C6
+    function mostrarAcciones() {
+      const contenedor = document.getElementById("acciones-contenedor")
+      contenedor.innerHTML = ""
+      
+      if (!datosActuales || !datosActuales.acciones) {
+        contenedor.innerHTML = "<p>No hay acciones registradas</p>"
+        return
+      }
+
+      const accionesOrdenadas = [...datosActuales.acciones]
+        .filter(accion => accion && accion.tipo_accion)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+
+      accionesOrdenadas.forEach(accion => {
+        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto)
+        const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha)
+        
+        const entidades = accion.entidades_relacionadas 
+          ? accion.entidades_relacionadas
+              .map(id => datosActuales.entidades.find(e => e.id === id))
+              .filter(e => e)
+              .map(e => e.nombre)
+              .join(", ")
+          : 'No especificadas'
+
+        const card = document.createElement('div')
+        card.className = 'accion-card clickable'
+        card.onclick = () => mostrarFichaElemento('accion', accion.id)
+        
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <span style="color: #f71616;">Hace ${tiempoTranscurrido}</span>
+            <span style="color: #f71616; margin: 0 5px;">|</span>
+            <span style="color: #f71616;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
+          </div>
+          <p style="color: #000000; margin-bottom: 8px;">${accion.descripcion}</p>
+          <div style="display: flex; align-items: center;">
+            <span><strong>Conflicto:</strong> ${conflicto ? conflicto.titulo : 'No especificado'}</span>
+            <span style="margin: 0 5px;">|</span>
+            <span><strong>Partes:</strong> ${entidades}</span>
+          </div>
+        `
+        
+        contenedor.appendChild(card)
+      })
+    }
 
     function mostrarGestionPartes() {
       ocultarTodosLosContenedoresAdmin();

@@ -390,6 +390,41 @@
       }
     }
 
+    // Función para capitalizar la primera letra de una cadena
+    function capitalizarPrimeraLetra(cadena) {
+      return cadena.charAt(0).toUpperCase() + cadena.slice(1);
+    }
+
+    // Función para mostrar conflictos (puedes ajustar esta función según tus necesidades)
+    function mostrarConflictos() {
+      const contenedor = document.getElementById("lista-conflictos");
+      contenedor.innerHTML = "<p>Cargando conflictos...</p>";
+
+      if (!datosActuales) {
+        cargarDatos().then(() => {
+          mostrarConflictos();
+        });
+        return;
+      }
+
+      if (datosActuales && datosActuales.conflictos && datosActuales.conflictos.length > 0) {
+        contenedor.innerHTML = ''; // Limpiar el mensaje de carga
+
+        datosActuales.conflictos.forEach(conflicto => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <h3>${conflicto.titulo}</h3>
+            <p>${conflicto.descripcion}</p>
+          `;
+          card.onclick = () => mostrarFichaElemento('conflicto', conflicto.id);
+          contenedor.appendChild(card);
+        });
+      } else {
+        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
+      }
+    }
+
     // Mantener el resto de las funciones existentes...
     // (mostrarConflictos, calcularDuracion, capitalizarPrimeraLetra, etc.)
 

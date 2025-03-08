@@ -276,7 +276,7 @@
     async function obtenerDatos() {
       try {
         const response = await fetch(BASE_URL, { headers });
-        if (!response.ok) throw new Error("Error al obtener datos");
+        if (!response.ok) throw new Error(`Error al obtener datos: ${response.status} ${response.statusText}`);
         const data = await response.json();
         datosActuales = data.record;
         return datosActuales;

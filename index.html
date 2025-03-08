@@ -413,9 +413,22 @@
         datosActuales.conflictos.forEach(conflicto => {
           const card = document.createElement("div");
           card.className = "card";
+
+          const fechaInicio = new Date(conflicto.fecha_inicio);
+          const diasTranscurridos = Math.floor((new Date() - fechaInicio) / (1000 * 60 * 60 * 24));
+
+          const ultimaAccion = datosActuales.acciones
+            .filter(accion => accion.id_conflicto === conflicto.id)
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+
+          const fechaUltimaAccion = ultimaAccion ? new Date(ultimaAccion.fecha) : null;
+          const diasDesdeUltimaAccion = fechaUltimaAccion ? Math.floor((new Date() - fechaUltimaAccion) / (1000 * 60 * 60 * 24)) : null;
+
           card.innerHTML = `
             <h3>${conflicto.titulo}</h3>
             <p>${conflicto.descripcion}</p>
+            <p><strong>Día ${diasTranscurridos}</strong></p>
+            ${ultimaAccion ? `<p><strong>Última acción:</strong> ${capitalizarPrimeraLetra(ultimaAccion.tipo_accion)} (hace ${diasDesdeUltimaAccion} días)</p>` : '<p><strong>Última acción:</strong> No hay acciones registradas</p>'}
           `;
           card.onclick = () => mostrarFichaElemento('conflicto', conflicto.id);
           contenedor.appendChild(card);

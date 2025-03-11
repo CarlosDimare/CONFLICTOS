@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conflictos</title>
+  <title>DeClase</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap');
     
@@ -724,38 +724,74 @@
       mostrarConflictos();
     }
 
-    function mostrarSeccion(seccion) {
-      // Ocultar todas las secciones primero
-      const secciones = ['conflictos', 'acciones', 'admin']
-      secciones.forEach(sec => {
-        const elemento = document.getElementById(sec)
-        if (elemento) elemento.classList.add('hidden')
-      })
+    // Función para inicializar la navegación
+    function inicializarNavegacion() {
+      console.log("Inicializando navegación");
       
-      // Mostrar la sección seleccionada
-      const seccionSeleccionada = document.getElementById(seccion)
-      if (seccionSeleccionada) {
-        seccionSeleccionada.classList.remove('hidden')
-      }
+      // Configurar los enlaces de navegación
+      const enlaces = document.querySelectorAll('nav a');
+      enlaces.forEach(enlace => {
+        enlace.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Remover clase activa de todos los enlaces
+          enlaces.forEach(el => el.classList.remove('active'));
+          
+          // Agregar clase activa al enlace actual
+          this.classList.add('active');
+          
+          // Determinar qué sección mostrar
+          let vista;
+          if (this.getAttribute('data-nav') === 'conflictos' || this.getAttribute('href') === '#conflictos') {
+            vista = 'lista-conflictos';
+          } else if (this.getAttribute('data-nav') === 'acciones' || this.getAttribute('href') === '#acciones') {
+            vista = 'gestion-acciones';
+          } else if (this.getAttribute('data-nav') === 'partes' || this.getAttribute('href') === '#partes') {
+            vista = 'gestion-partes';
+          } else if (this.getAttribute('data-nav') === 'personas' || this.getAttribute('href') === '#personas') {
+            vista = 'gestion-personas';
+          } else {
+            vista = this.getAttribute('data-seccion') || this.getAttribute('href').substring(1);
+          }
+          
+          console.log("Mostrando vista:", vista);
+          
+          // Ocultar todas las vistas
+          document.querySelectorAll('.vista-principal').forEach(v => {
+            v.classList.add('hidden');
+          });
+          
+          // Mostrar la vista seleccionada
+          const vistaElement = document.getElementById(vista);
+          if (vistaElement) {
+            vistaElement.classList.remove('hidden');
+            
+            // Cargar datos específicos según la vista
+            if (vista === 'lista-conflictos') {
+              mostrarListaConflictos();
+            } else if (vista === 'gestion-acciones') {
+              mostrarGestionAcciones();
+            } else if (vista === 'gestion-partes') {
+              mostrarGestionPartes();
+            } else if (vista === 'gestion-personas') {
+              mostrarGestionPersonas();
+            }
+          } else {
+            console.error("No se encontró el elemento para la vista:", vista);
+          }
+        });
+      });
       
-      // Actualizar navegación activa
-      document.querySelectorAll('nav a').forEach(a => {
-        a.classList.remove('active')
-      })
-      const navActivo = document.getElementById(`nav-${seccion}`)
-      if (navActivo) {
-        navActivo.classList.add('active')
+      // Mostrar la vista de conflictos por defecto
+      const defaultLink = document.querySelector('nav a[data-nav="conflictos"]') || 
+                          document.querySelector('nav a[href="#conflictos"]') ||
+                          document.querySelector('nav a');
+      
+      if (defaultLink) {
+        defaultLink.click();
+      } else {
+        console.error("No se encontró ningún enlace de navegación");
       }
-
-      // Cargar el contenido específico
-      if (seccion === 'conflictos') {
-        mostrarConflictos()
-      } else if (seccion === 'acciones') {
-        mostrarAcciones()
-      }
-
-      // Prevenir el comportamiento por defecto del enlace
-      return false
     }
 
     function toggleView() {
@@ -797,28 +833,29 @@
     }
 
     function mostrarConflictos() {
-      const contenedor = document.getElementById("lista-conflictos")
-      contenedor.innerHTML = ""
+      console.log("Mostrando conflictos");
+      const contenedor = document.getElementById("lista-conflictos");
+      contenedor.innerHTML = "";
       
       if (datosActuales && datosActuales.conflictos && datosActuales.conflictos.length > 0) {
         const conflictosOrdenados = datosActuales.conflictos.map(conflicto => {
-          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id)
+          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id);
           const ultimaAccion = acciones.length > 0 
             ? acciones.reduce((a, b) => new Date(a.fecha) > new Date(b.fecha) ? a : b)
-            : null
+            : null;
           return {
             ...conflicto,
             ultimaAccion
-          }
+          };
         }).sort((a, b) => {
-          if (!a.ultimaAccion) return 1
-          if (!b.ultimaAccion) return -1
-          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha)
-        })
+          if (!a.ultimaAccion) return 1;
+          if (!b.ultimaAccion) return -1;
+          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha);
+        });
 
         conflictosOrdenados.forEach((conflicto) => {
-          const card = document.createElement("div")
-          card.className = "card"
+          const card = document.createElement("div");
+          card.className = "card";
           // Calcular duración considerando si está resuelto o no
           const duracion = calcularDuracion(
             conflicto.fecha_inicio, 
@@ -828,130 +865,139 @@
           // Determinar el color del indicador de estado
           const estadoColor = conflicto.estado === "resuelto" ? "#4CAF50" : "#f71616";
           
-          let ultimaAccionTexto = ''
+          let ultimaAccionTexto = '';
           if (conflicto.ultimaAccion) {
             const diasDesdeUltimaAccion = Math.floor(
               (new Date() - new Date(conflicto.ultimaAccion.fecha)) / (1000 * 60 * 60 * 24)
-            )
+            );
             ultimaAccionTexto = `
               <div class="ultima-accion">
                 <span style="color: #f71616;">Última acción | </span>
                 <span style="color: #f71616;">${capitalizarPrimeraLetra(conflicto.ultimaAccion.tipo_accion)}</span>
                 <span style="color: #f71616;"> hace ${diasDesdeUltimaAccion} días</span>
-              </div>`
+              </div>`;
           }
-
+          
           card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <h3 style="margin: 0;">${conflicto.titulo}</h3>
-              <div style="display: flex; align-items: center;">
-                <span class="estado-indicador" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${estadoColor}; margin-right: 8px;"></span>
-                <span style="color: #f71616; font-weight: bold;">Día ${duracion}</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <p style="color: #f71616; font-weight: bold; margin-bottom: 8px;">Día ${duracion}</p>
+                <h3>${conflicto.titulo}</h3>
+                <p>${conflicto.descripcion.substring(0, 150)}${conflicto.descripcion.length > 150 ? '...' : ''}</p>
+                ${ultimaAccionTexto}
+              </div>
+              <div style="margin-left: 15px;">
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${estadoColor};"></span>
+                <span style="font-size: 0.9em; color: ${estadoColor};">${capitalizarPrimeraLetra(conflicto.estado)}</span>
               </div>
             </div>
-            <p>${vistaCompacta ? conflicto.descripcion.substring(0, 80) + '...' : conflicto.descripcion}</p>
-            ${ultimaAccionTexto}
-          `
-          card.onclick = () => mostrarFichaConflicto(conflicto.id)
-          contenedor.appendChild(card)
-        })
+          `;
+          
+          card.onclick = () => mostrarFichaConflicto(conflicto.id);
+          contenedor.appendChild(card);
+        });
       } else {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>"
+        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
       }
     }
 
+    // Función para mostrar la ficha de un conflicto
     function mostrarFichaConflicto(id) {
-      const conflicto = datosActuales.conflictos.find((c) => c.id === id);
-      if (!conflicto) return;
+      const conflicto = datosActuales.conflictos.find(c => c.id === id);
+      if (!conflicto) {
+        console.error("Conflicto no encontrado:", id);
+        return;
+      }
 
-      const duracion = calcularDuracion(
-        conflicto.fecha_inicio,
+      // Calcular la duración del conflicto en días
+      const duracionDias = calcularDuracion(
+        conflicto.fecha_inicio, 
         conflicto.estado === "resuelto" ? conflicto.fecha_fin : null
       );
 
-      // Obtener y ordenar las acciones cronológicamente (más antiguas primero)
-      const acciones = datosActuales.acciones
+      const modalId = `modal-ficha-conflicto-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Obtener acciones relacionadas
+      const accionesConflicto = datosActuales.acciones
         .filter(a => a.id_conflicto === id)
         .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-      // Obtener entidades relacionadas
-      const entidades = conflicto.entidades_involucradas
-        ? conflicto.entidades_involucradas
-            .map(id => datosActuales.entidades.find(e => e.id === id))
-            .filter(e => e)
-            .map(e => e.nombre)
-            .join(", ")
-        : "No hay entidades registradas";
-
-      // Obtener personas relacionadas
-      const personas = conflicto.personas_involucradas
-        ? conflicto.personas_involucradas
-            .map(id => datosActuales.personas.find(p => p.id === id))
-            .filter(p => p)
-            .map(p => p.nombre)
-            .join(", ")
-        : "No hay personas registradas";
-
-      let contenidoModal = `
-        <div class="ficha-conflicto">
-          <p><strong>Descripción:</strong> ${conflicto.descripcion}</p>
-          <p><strong>Estado:</strong> ${capitalizarPrimeraLetra(conflicto.estado)}</p>
-          <p><strong>Inicio:</strong> ${conflicto.fecha_inicio}</p>
-          <p><strong>Duración:</strong> ${duracion} días</p>
-          <p><strong>Ubicación:</strong> ${conflicto.ubicacion || "No especificada"}</p>
-          <p><strong>Entidades involucradas:</strong> ${entidades}</p>
-          <p><strong>Personas involucradas:</strong> ${personas}</p>
-        `;
-
-      if (acciones.length > 0) {
-        contenidoModal += `
-          <div class="acciones-seccion">
-            <h4>Cronología de Acciones</h4>
-            <ul class="acciones-lista">
-              ${acciones.map(accion => {
-                const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
-                return `
-                  <li>
-                    <div class="accion-item">
-                      <div class="accion-fecha">
-                        <strong>Día ${diaAccion}</strong> - ${accion.fecha}
-                      </div>
-                      <div class="accion-detalle">
-                        <strong>${capitalizarPrimeraLetra(accion.tipo_accion)}:</strong> 
-                        ${accion.descripcion}
-                      </div>
-                    </div>
-                  </li>
-                `;
-              }).join('')}
-            </ul>
+      // Crear línea de tiempo de acciones
+      const timelineHTML = accionesConflicto.map(accion => {
+        const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
+        return `
+          <div class="timeline-item">
+            <div class="timeline-date">Día ${diaAccion}</div>
+            <div class="timeline-content">
+              <h4>${capitalizarPrimeraLetra(accion.tipo_accion)}</h4>
+              <p>${accion.descripcion}</p>
+            </div>
           </div>
         `;
-      } else {
-        contenidoModal += "<p>No hay acciones registradas para este conflicto.</p>";
+      }).join('');
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h3>${conflicto.titulo}</h3>
+          <span class="estado-badge" style="background-color: ${conflicto.estado === 'resuelto' ? '#4CAF50' : '#f71616'}">
+            ${capitalizarPrimeraLetra(conflicto.estado)}
+          </span>
+        </div>
+        <div class="modal-content">
+          <div class="info-section">
+            <p><strong>Duración: ${duracionDias} días</strong></p>
+            <p><strong>Fecha de inicio:</strong> ${conflicto.fecha_inicio}</p>
+            ${conflicto.estado === 'resuelto' ? `<p><strong>Fecha de resolución:</strong> ${conflicto.fecha_fin}</p>` : ''}
+            <p>${conflicto.descripcion}</p>
+          </div>
+          <div class="timeline-section">
+            <h4>Línea de tiempo</h4>
+            <div class="timeline">
+              ${timelineHTML}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para cerrar un modal específico
+    function cerrarModalEspecifico(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        const overlay = modal.previousElementSibling;
+        if (overlay && overlay.className === "modal-overlay") {
+          overlay.remove();
+        }
+        modal.remove();
       }
-
-      contenidoModal += "</div>";
-
-      document.getElementById("modal-titulo").textContent = conflicto.titulo;
-      document.getElementById("modal-contenido").innerHTML = contenidoModal;
-      
-      document.getElementById("modal").classList.remove("hidden");
-      document.getElementById("modal-overlay").classList.remove("hidden");
     }
 
     function calcularTiempoTranscurrido(fecha) {
-      const ahora = new Date();
       const fechaAccion = new Date(fecha);
+      const ahora = new Date();
+      
       const diferenciaEnMilisegundos = ahora - fechaAccion;
       const diferenciaEnHoras = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60));
       const diferenciaEnDias = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24));
-
-      if (diferenciaEnHoras < 1) return "hace menos de una hora"; // Si es menos de una hora
-      if (diferenciaEnHoras === 1) return "hace 1 hora"; // Si fue hace una hora
-      if (diferenciaEnHoras < 24) return `hace ${diferenciaEnHoras} horas`; // Si fue hace menos de un día
-      if (diferenciaEnDias === 1) return "hace 1 día"; // Si fue hace un día
-      return `hace ${diferenciaEnDias} días`; // Para más de un día
+      
+      if (diferenciaEnHoras < 1) return "Hace menos de una hora";
+      if (diferenciaEnHoras === 1) return "Hace 1 hora";
+      if (diferenciaEnHoras < 24) return `Hace ${diferenciaEnHoras} horas`;
+      if (diferenciaEnDias === 1) return "Hace 1 día";
+      return `Hace ${diferenciaEnDias} días`;
     }
 
     function mostrarFichaElemento(tipo, id) {
@@ -1279,7 +1325,13 @@
     }
 
     function mostrarAcciones() {
+      console.log("Mostrando acciones");
       const contenedor = document.getElementById("acciones-contenedor");
+      if (!contenedor) {
+        console.error("No se encontró el contenedor de acciones");
+        return;
+      }
+      
       contenedor.innerHTML = "";
       
       if (!datosActuales || !datosActuales.acciones || datosActuales.acciones.length === 0) {
@@ -1296,34 +1348,429 @@
       );
       
       accionesOrdenadas.forEach(accion => {
-        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
-        if (!conflicto) return; // Saltar si no hay conflicto asociado
+        const conflicto = accion.id_conflicto 
+          ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
+          : null;
         
-        const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
         const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
         
         const card = document.createElement("div");
-        card.className = "accion-card";
+        card.className = "card";
+        card.style.cursor = "pointer";
         
-        // Obtener entidades relacionadas con la acción
-        const entidadesAccion = accion.entidades_relacionadas
-          ? accion.entidades_relacionadas
-              .map(id => datosActuales.entidades.find(e => e.id === id))
-              .filter(e => e)
-              .map(e => e.nombre)
+        card.innerHTML = `
+          <div style="margin-bottom: 10px; color: var(--color-primary); font-weight: bold;">
+            ${tiempoTranscurrido.replace(/^hace/i, 'Hace')}
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</strong> | ${accion.descripcion || 'Sin descripción'}
+          </div>
+          ${conflicto ? `
+            <div style="font-size: 0.9em; color: #666;">
+              ${conflicto.titulo}
+            </div>
+          ` : ''}
+        `;
+        
+        card.onclick = () => mostrarFichaAccion(accion.id);
+        fragment.appendChild(card);
+      });
+      
+      contenedor.appendChild(fragment);
+    }
+
+    // Función para mostrar ficha de acción
+    function mostrarFichaAccion(id) {
+      const accion = datosActuales.acciones.find((a) => a.id === id);
+      if (!accion) return;
+
+      // Crear un modal para mostrar la ficha
+      const modalId = `modal-ficha-accion-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+      modal.style.width = "90%";
+      modal.style.maxWidth = "800px";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Calcular tiempo transcurrido
+      const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
+      
+      // Obtener conflicto relacionado
+      const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+      
+      // Obtener entidades relacionadas
+      const entidadesRelacionadas = accion.entidades_relacionadas 
+        ? accion.entidades_relacionadas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
+        : [];
+
+      modal.innerHTML = `
+        <div style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">${capitalizarPrimeraLetra(accion.tipo_accion)}</h2>
+            <span style="color: var(--color-primary); font-weight: bold;">${tiempoTranscurrido}</span>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 10px;">
+              <strong>Fecha:</strong> ${accion.fecha}
+            </div>
+            <div style="margin-bottom: 15px;">
+              <strong>Descripción:</strong>
+              <p>${accion.descripcion}</p>
+            </div>
+            
+            ${conflicto ? `
+              <div style="margin-bottom: 10px;">
+                <strong>Conflicto:</strong>
+                <a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${conflicto.id});" 
+                   style="color: var(--color-primary); text-decoration: none;">
+                  ${conflicto.titulo}
+                </a>
+              </div>
+            ` : ''}
+            
+            ${entidadesRelacionadas.length > 0 ? `
+              <div>
+                <strong>Entidades relacionadas:</strong>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                  ${entidadesRelacionadas.map(e => `
+                    <span onclick="mostrarFichaEntidad(${e.id})" 
+                          style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px; cursor: pointer;">
+                      ${e.nombre}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          
+          <div style="text-align: right;">
+            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar ficha de entidad
+    function mostrarFichaEntidad(id) {
+      const entidad = datosActuales.entidades.find((e) => e.id === id);
+      if (!entidad) return;
+
+      const modalId = `modal-ficha-entidad-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Encontrar conflictos relacionados
+      const conflictosRelacionados = datosActuales.conflictos.filter(
+        c => c.entidades_involucradas && c.entidades_involucradas.includes(entidad.id)
+      );
+
+      modal.innerHTML = `
+        <div style="padding: 20px;">
+          <h2 style="margin-top: 0;">${entidad.nombre}</h2>
+          <div style="margin-bottom: 15px;">
+            <strong>Tipo:</strong> ${capitalizarPrimeraLetra(entidad.tipo)}
+          </div>
+          ${entidad.descripcion ? `
+            <div style="margin-bottom: 15px;">
+              <strong>Descripción:</strong>
+              <p>${entidad.descripcion}</p>
+            </div>
+          ` : ''}
+          
+          <div>
+            <strong>Conflictos relacionados:</strong>
+            ${conflictosRelacionados.length > 0 ? `
+              <ul style="margin-top: 5px;">
+                ${conflictosRelacionados.map(c => `
+                  <li><a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${c.id});" 
+                         style="color: var(--color-primary); text-decoration: none;">
+                    ${c.titulo}
+                  </a></li>
+                `).join('')}
+              </ul>
+            ` : '<p>No hay conflictos relacionados</p>'}
+          </div>
+          
+          <div style="text-align: right; margin-top: 20px;">
+            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar ficha de persona
+    function mostrarFichaPersona(id) {
+      const persona = datosActuales.personas.find((p) => p.id === id);
+      if (!persona) return;
+
+      const modalId = `modal-ficha-persona-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Encontrar conflictos relacionados
+      const conflictosRelacionados = datosActuales.conflictos.filter(
+        c => c.personas_involucradas && c.personas_involucradas.includes(persona.id)
+      );
+
+      // Encontrar entidades relacionadas
+      const entidadesRelacionadas = persona.entidades_relacionadas 
+        ? persona.entidades_relacionadas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
+        : [];
+
+      modal.innerHTML = `
+        <div style="padding: 20px;">
+          <h2 style="margin-top: 0;">${persona.nombre}</h2>
+          <div style="margin-bottom: 15px;">
+            <strong>Rol:</strong> ${persona.rol || 'No especificado'}
+          </div>
+          ${persona.contacto ? `
+            <div style="margin-bottom: 15px;">
+              <strong>Contacto:</strong> ${persona.contacto}
+            </div>
+          ` : ''}
+          
+          ${entidadesRelacionadas.length > 0 ? `
+            <div style="margin-bottom: 15px;">
+              <strong>Entidades relacionadas:</strong>
+              <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                ${entidadesRelacionadas.map(e => `
+                  <span onclick="mostrarFichaEntidad(${e.id})" 
+                        style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px; cursor: pointer;">
+                    ${e.nombre}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          
+          <div>
+            <strong>Conflictos relacionados:</strong>
+            ${conflictosRelacionados.length > 0 ? `
+              <ul style="margin-top: 5px;">
+                ${conflictosRelacionados.map(c => `
+                  <li><a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${c.id});" 
+                         style="color: var(--color-primary); text-decoration: none;">
+                    ${c.titulo}
+                  </a></li>
+                `).join('')}
+              </ul>
+            ` : '<p>No hay conflictos relacionados</p>'}
+          </div>
+          
+          <div style="text-align: right; margin-top: 20px;">
+            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar ficha de conflicto
+    function mostrarFichaConflicto(id) {
+      const conflicto = datosActuales.conflictos.find((c) => c.id === id);
+      if (!conflicto) return;
+
+      const modalId = `modal-ficha-conflicto-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+      modal.style.width = "90%";
+      modal.style.maxWidth = "800px";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Obtener entidades relacionadas
+      const entidadesRelacionadas = conflicto.entidades_involucradas 
+        ? conflicto.entidades_involucradas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
+        : [];
+
+      // Obtener personas relacionadas
+      const personasRelacionadas = conflicto.personas_involucradas 
+        ? conflicto.personas_involucradas.map(id => datosActuales.personas.find(p => p.id === id)).filter(p => p)
+        : [];
+
+      // Obtener acciones relacionadas
+      const accionesRelacionadas = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id);
+
+      modal.innerHTML = `
+        <div style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <p style="color: #f71616; font-weight: bold; margin: 0 0 5px 0;">Día ${duracion}</p>
+              <h2 style="margin: 0;">${conflicto.titulo}</h2>
+            </div>
+            <span style="background: ${conflicto.estado === 'activo' ? '#FF5252' : '#4CAF50'}; 
+                       color: white; padding: 3px 8px; border-radius: 3px;">
+              ${capitalizarPrimeraLetra(conflicto.estado)}
+            </span>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 10px;">
+              <strong>Inicio:</strong> ${conflicto.fecha_inicio}
+            </div>
+            <div style="margin-bottom: 10px;">
+              <strong>Ubicación:</strong> ${conflicto.ubicacion || 'No especificada'}
+            </div>
+            <div style="margin-bottom: 15px;">
+              <strong>Descripción:</strong>
+              <p>${conflicto.descripcion}</p>
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div>
+              <h3 style="margin-top: 0;">Entidades involucradas</h3>
+              ${entidadesRelacionadas.length > 0 ? `
+                <ul>
+                  ${entidadesRelacionadas.map(e => `
+                    <li><a href="#" onclick="event.preventDefault(); mostrarFichaEntidad(${e.id});" 
+                           style="color: var(--color-primary); text-decoration: none;">
+                      ${e.nombre}
+                    </a></li>
+                  `).join('')}
+                </ul>
+              ` : '<p>No hay entidades relacionadas</p>'}
+            </div>
+            
+            <div>
+              <h3 style="margin-top: 0;">Personas involucradas</h3>
+              ${personasRelacionadas.length > 0 ? `
+                <ul>
+                  ${personasRelacionadas.map(p => `
+                    <li><a href="#" onclick="event.preventDefault(); mostrarFichaPersona(${p.id});" 
+                           style="color: var(--color-primary); text-decoration: none;">
+                      ${p.nombre}
+                    </a></li>
+                  `).join('')}
+                </ul>
+              ` : '<p>No hay personas relacionadas</p>'}
+            </div>
+          </div>
+          
+          <div>
+            <h3>Línea de tiempo</h3>
+            ${accionesRelacionadas.length > 0 ? `
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${accionesRelacionadas
+                  .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                  .map(a => {
+                    const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, a.fecha);
+                    return `
+                      <div class="card" style="margin: 0; cursor: pointer;" 
+                           onclick="mostrarFichaAccion(${a.id})">
+                        <div style="display: flex; justify-content: space-between;">
+                          <strong>Día ${diaAccion} - ${a.fecha}</strong>
+                          <span>${capitalizarPrimeraLetra(a.tipo_accion)}</span>
+                        </div>
+                        <p>${a.descripcion}</p>
+                      </div>
+                    `;
+                  }).join('')}
+              </div>
+            ` : '<p>No hay acciones registradas</p>'}
+          </div>
+          
+          <div style="text-align: right; margin-top: 20px;">
+            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar conflictos
+    function mostrarConflictos() {
+      console.log("Mostrando conflictos");
+      const contenedor = document.getElementById("lista-conflictos");
+      if (!contenedor) {
+        console.error("No se encontró el contenedor de conflictos");
+        return;
+      }
+      
+      contenedor.innerHTML = "";
+      
+      if (!datosActuales || !datosActuales.conflictos || datosActuales.conflictos.length === 0) {
+        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
+        return;
+      }
+      
+      // Crear un fragmento para mejorar el rendimiento
+      const fragment = document.createDocumentFragment();
+      
+      // Ordenar conflictos por fecha (más recientes primero)
+      const conflictosOrdenados = [...datosActuales.conflictos].sort((a, b) => 
+        new Date(b.fecha_inicio) - new Date(a.fecha_inicio)
+      );
+      
+      conflictosOrdenados.forEach(conflicto => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.cursor = "pointer";
+        
+        // Calcular días transcurridos
+        const fechaInicio = new Date(conflicto.fecha_inicio);
+        const hoy = new Date();
+        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+        
+        // Obtener entidades relacionadas
+        const entidadesNombres = conflicto.entidades_involucradas
+          ? conflicto.entidades_involucradas
+              .map(id => {
+                const entidad = datosActuales.entidades.find(e => e.id === id);
+                return entidad ? entidad.nombre : null;
+              })
+              .filter(nombre => nombre)
               .join(", ")
           : "No especificadas";
         
         card.innerHTML = `
-          <div class="accion-fecha">
-            <span>${accion.fecha} (${tiempoTranscurrido})</span>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0;">${conflicto.titulo}</h3>
+            <span style="background: ${conflicto.estado === 'activo' ? '#FF5252' : '#4CAF50'}; 
+                         color: white; padding: 3px 8px; border-radius: 3px;">
+              ${capitalizarPrimeraLetra(conflicto.estado)}
+            </span>
           </div>
-          <h3>${conflicto.titulo} - Día ${diaAccion}</h3>
-          <p><strong>${capitalizarPrimeraLetra(accion.tipo_accion)}</strong> | ${accion.descripcion}</p>
-          <p><small>Parte: ${entidadesAccion}</small></p>
+          <div style="margin-bottom: 8px;">
+            <strong>Inicio:</strong> ${conflicto.fecha_inicio} (${diasTranscurridos} días)
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>Ubicación:</strong> ${conflicto.ubicacion || 'No especificada'}
+          </div>
+          <div>
+            <strong>Partes:</strong> ${entidadesNombres}
+          </div>
         `;
         
-        card.onclick = () => mostrarFichaElemento("accion", accion.id);
+        card.onclick = () => mostrarFichaConflicto(conflicto.id);
         fragment.appendChild(card);
       });
       
@@ -1343,9 +1790,59 @@
     }
 
     function mostrarGestionAcciones() {
-      ocultarTodosLosContenedoresAdmin();
-      document.getElementById('gestion-acciones').classList.remove('hidden');
-      cargarListaAcciones();
+      console.log("Mostrando gestión de acciones");
+      const listaAcciones = document.getElementById('lista-acciones');
+      if (!listaAcciones) return;
+      
+      listaAcciones.innerHTML = '';
+      
+      if (!datosActuales.acciones || datosActuales.acciones.length === 0) {
+        listaAcciones.innerHTML = "<p>No hay acciones registradas.</p>";
+        return;
+      }
+      
+      const accionesOrdenadas = [...datosActuales.acciones].sort((a, b) => 
+        new Date(b.fecha) - new Date(a.fecha)
+      );
+      
+      accionesOrdenadas.forEach(accion => {
+        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+        if (!conflicto) return;
+        
+        const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
+        
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.margin = "10px 0";
+        card.style.padding = "15px";
+        
+        card.innerHTML = `
+          <div style="display: flex; flex-direction: column;">
+            <div style="margin-bottom: 10px;">
+              <span style="color: #f71616; font-weight: bold;">Día ${diaAccion}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
+              <span style="margin: 0 5px;">|</span>
+              <span>${accion.descripcion}</span>
+            </div>
+            <div style="margin-top: 5px; font-size: 0.9em;">
+              <span style="color: #666;">Conflicto: </span>
+              <span>${conflicto.titulo}</span>
+            </div>
+          </div>
+        `;
+        
+        card.onclick = () => mostrarFichaAccion(accion.id);
+        listaAcciones.appendChild(card);
+      });
+    }
+
+    // Función para ocultar todas las vistas
+    function ocultarTodasLasVistas() {
+      document.querySelectorAll('.vista-principal').forEach(vista => {
+        vista.classList.add('hidden');
+      });
     }
 
     async function cargarListaPartes() {
@@ -1380,7 +1877,7 @@
         div.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <strong>${persona.nombre}</strong> (${persona.rol})
+              <strong>${persona.nombre}</strong> (${persona.rol || 'Sin rol'})
             </div>
             <div>
               <button onclick="editarPersona(${persona.id})">Editar</button>
@@ -1427,11 +1924,16 @@
 
     // Asegurarse de que los datos se cargan al inicio
     window.onload = async function() {
-      await cargarDatos()
-      mostrarSeccion('acciones')
+      try {
+        await cargarDatos();
+        // Mostrar la sección de acciones por defecto
+        mostrarSeccion('acciones');
+      } catch (error) {
+        console.error("Error al cargar datos iniciales:", error);
+      }
     };
 
-    // Agregar esta función para capitalizar la primera letra
+    // Función para capitalizar la primera letra
     function capitalizarPrimeraLetra(texto) {
       if (!texto) return '';
       return texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -2050,17 +2552,21 @@
       modal.innerHTML = `
         <h3>Nueva Parte</h3>
         <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" required>
+          <label for="nombre-entidad">Nombre</label>
+          <input type="text" id="nombre-entidad" required>
         </div>
         <div class="form-group">
-          <label for="tipo">Tipo</label>
-          <select id="tipo" required>
+          <label for="tipo-entidad">Tipo</label>
+          <select id="tipo-entidad" required>
             <option value="sindicato">Sindicato</option>
             <option value="empresa">Empresa</option>
             <option value="gobierno">Gobierno</option>
             <option value="otro">Otro</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label for="descripcion-entidad">Descripción (opcional)</label>
+          <textarea id="descripcion-entidad" rows="3"></textarea>
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 15px;">
           <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
@@ -2083,24 +2589,35 @@
       overlay.className = "modal-overlay";
       overlay.onclick = () => cerrarModalEspecifico(modalId);
 
+      // Obtener lista de entidades para el select
+      const opcionesEntidades = datosActuales.entidades
+        .map(e => `<option value="${e.id}">${e.nombre}</option>`)
+        .join('');
+
       modal.innerHTML = `
         <h3>Nueva Persona</h3>
         <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" required>
+          <label for="nombre-persona">Nombre</label>
+          <input type="text" id="nombre-persona" required>
         </div>
         <div class="form-group">
-          <label for="rol">Rol</label>
-          <input type="text" id="rol" required>
+          <label for="rol-persona">Rol</label>
+          <input type="text" id="rol-persona" required>
         </div>
         <div class="form-group">
-          <label for="entidad">Entidad</label>
-          <select id="entidad" required>
-            <option value="">Seleccione una entidad</option>
-            ${datosActuales.entidades.map(e => 
-              `<option value="${e.id}">${e.nombre}</option>`
-            ).join('')}
-          </select>
+          <label for="contacto-persona">Contacto (opcional)</label>
+          <input type="text" id="contacto-persona">
+        </div>
+        <div class="form-group">
+          <label>Entidades Relacionadas</label>
+          <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-top: 5px;">
+            ${opcionesEntidades ? datosActuales.entidades.map(e => `
+              <div class="entidad-item">
+                <input type="checkbox" id="entidad-persona-${e.id}" value="${e.id}">
+                <label for="entidad-persona-${e.id}">${e.nombre}</label>
+              </div>
+            `).join('') : '<p>No hay entidades disponibles</p>'}
+          </div>
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 15px;">
           <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
@@ -2112,50 +2629,356 @@
       document.body.appendChild(modal);
     }
 
-    // Función para editar una persona
-    function editarPersona(id) {
-      const persona = datosActuales.personas.find(p => p.id === id);
-      if (!persona) {
-        alert("Persona no encontrada");
-        return;
+    // Función para guardar una nueva persona
+    function guardarNuevaPersona(modalId) {
+      try {
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+          console.error("Modal no encontrado:", modalId);
+          return;
+        }
+        
+        const nombreInput = modal.querySelector('#nombre-persona');
+        const rolInput = modal.querySelector('#rol-persona');
+        const contactoInput = modal.querySelector('#contacto-persona');
+        
+        if (!nombreInput || !rolInput) {
+          console.error("Campos del formulario no encontrados");
+          return;
+        }
+        
+        const nombre = nombreInput.value.trim();
+        const rol = rolInput.value.trim();
+        const contacto = contactoInput ? contactoInput.value.trim() : "";
+        
+        // Obtener entidades seleccionadas
+        const entidadesRelacionadas = Array.from(
+          modal.querySelectorAll('input[type="checkbox"]:checked')
+        ).map(cb => parseInt(cb.value));
+        
+        if (!nombre) {
+          alert("Por favor ingrese un nombre");
+          return;
+        }
+        
+        // Generar ID único
+        const nuevoId = Math.max(0, ...datosActuales.personas.map(p => p.id)) + 1;
+        
+        // Crear nueva persona
+        const nuevaPersona = {
+          id: nuevoId,
+          nombre,
+          rol,
+          contacto,
+          entidades_relacionadas: entidadesRelacionadas.length > 0 ? entidadesRelacionadas : undefined
+        };
+        
+        // Agregar a los datos
+        datosActuales.personas.push(nuevaPersona);
+        
+        // Mostrar indicador de guardado
+        const saveIndicator = document.createElement("div");
+        saveIndicator.style.position = "fixed";
+        saveIndicator.style.top = "20px";
+        saveIndicator.style.right = "20px";
+        saveIndicator.style.padding = "10px 20px";
+        saveIndicator.style.backgroundColor = "var(--color-primary)";
+        saveIndicator.style.color = "white";
+        saveIndicator.style.borderRadius = "4px";
+        saveIndicator.style.zIndex = "9999";
+        saveIndicator.textContent = "Guardando...";
+        document.body.appendChild(saveIndicator);
+        
+        // Actualizar los datos en el servidor
+        actualizarDatos(datosActuales).then(() => {
+          // Actualizar mensaje de guardado exitoso
+          saveIndicator.textContent = "¡Guardado con éxito!";
+          saveIndicator.style.backgroundColor = "#4CAF50";
+          
+          // Eliminar el indicador después de 2 segundos
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+          
+          // Cerrar modal
+          cerrarModalEspecifico(modalId);
+          
+          // Actualizar vista
+          cargarListaPersonas();
+        }).catch(error => {
+          console.error("Error al guardar datos:", error);
+          saveIndicator.textContent = "Error al guardar";
+          saveIndicator.style.backgroundColor = "#F44336";
+          
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+        });
+        
+        console.log("Persona guardada:", nuevaPersona);
+      } catch (error) {
+        console.error("Error al guardar la persona:", error);
+        alert("Error al guardar la persona. Por favor intente nuevamente.");
       }
+    }
 
-      const modalId = `modal-editar-persona-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
+    // Contador para las fuentes
+    let contadorFuentes = 1;
 
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
-
-      modal.innerHTML = `
-        <h3>Editar Persona</h3>
-        <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" value="${persona.nombre}" required>
+    // Función para agregar otra fuente
+    function agregarFuente() {
+      const contenedor = document.getElementById('fuentes-container');
+      const nuevaFuente = document.createElement('div');
+      nuevaFuente.className = 'fuente-item';
+      nuevaFuente.style = 'margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;';
+      
+      nuevaFuente.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <h4 style="margin: 0;">Fuente ${contadorFuentes + 1}</h4>
+          <button type="button" onclick="this.parentNode.parentNode.remove()" style="background: none; border: none; color: #FF5252; cursor: pointer;">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
         <div class="form-group">
-          <label for="rol">Rol</label>
-          <input type="text" id="rol" value="${persona.rol}" required>
+          <label for="fuente-titulo-${contadorFuentes}">Título</label>
+          <input type="text" id="fuente-titulo-${contadorFuentes}" placeholder="Título de la fuente">
         </div>
         <div class="form-group">
-          <label for="entidad">Entidad</label>
-          <select id="entidad" required>
-            <option value="">Seleccione una entidad</option>
-            ${datosActuales.entidades.map(e => 
-              `<option value="${e.id}" ${e.id === persona.id_entidad ? 'selected' : ''}>${e.nombre}</option>`
-            ).join('')}
-          </select>
+          <label for="fuente-url-${contadorFuentes}">URL</label>
+          <input type="url" id="fuente-url-${contadorFuentes}" placeholder="https://...">
         </div>
-        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
-          <button onclick="guardarEdicionPersona(${id}, '${modalId}')">Guardar</button>
+        <div class="form-group">
+          <label for="fuente-medio-${contadorFuentes}">Medio</label>
+          <input type="text" id="fuente-medio-${contadorFuentes}" placeholder="Nombre del medio">
         </div>
       `;
+      
+      contenedor.appendChild(nuevaFuente);
+      contadorFuentes++;
+    }
 
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
+    // Función para guardar una nueva acción
+    function guardarNuevaAccion(modalId) {
+      try {
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+          console.error("Modal no encontrado:", modalId);
+          return;
+        }
+        
+        const tipoAccion = modal.querySelector('#tipo_accion').value;
+        const fecha = modal.querySelector('#fecha').value;
+        const descripcion = modal.querySelector('#descripcion').value;
+        const idConflicto = parseInt(modal.querySelector('#id_conflicto').value);
+        
+        // Obtener entidades seleccionadas
+        const entidadesRelacionadas = Array.from(
+          modal.querySelectorAll('input[type="checkbox"]:checked')
+        ).map(cb => parseInt(cb.value));
+        
+        // Validar campos requeridos
+        if (!tipoAccion || !fecha || !descripcion || isNaN(idConflicto)) {
+          alert("Por favor complete todos los campos requeridos");
+          return;
+        }
+        
+        // Recopilar fuentes
+        const fuentes = [];
+        const fuentesItems = modal.querySelectorAll('.fuente-item');
+        
+        fuentesItems.forEach((item, index) => {
+          const titulo = modal.querySelector(`#fuente-titulo-${index}`)?.value.trim();
+          const url = modal.querySelector(`#fuente-url-${index}`)?.value.trim();
+          const medio = modal.querySelector(`#fuente-medio-${index}`)?.value.trim();
+          
+          if (url) {
+            fuentes.push({
+              titulo: titulo || "Fuente " + (index + 1),
+              url,
+              medio
+            });
+          }
+        });
+        
+        // Generar ID único
+        const nuevoId = Math.max(0, ...datosActuales.acciones.map(a => a.id)) + 1;
+        
+        // Crear nueva acción
+        const nuevaAccion = {
+          id: nuevoId,
+          tipo_accion: tipoAccion,
+          fecha,
+          descripcion,
+          id_conflicto: idConflicto,
+          entidades_relacionadas: entidadesRelacionadas,
+          fuentes: fuentes.length > 0 ? fuentes : undefined
+        };
+        
+        // Agregar a los datos
+        datosActuales.acciones.push(nuevaAccion);
+        
+        // Mostrar indicador de guardado
+        const saveIndicator = document.createElement("div");
+        saveIndicator.style.position = "fixed";
+        saveIndicator.style.top = "20px";
+        saveIndicator.style.right = "20px";
+        saveIndicator.style.padding = "10px 20px";
+        saveIndicator.style.backgroundColor = "var(--color-primary)";
+        saveIndicator.style.color = "white";
+        saveIndicator.style.borderRadius = "4px";
+        saveIndicator.style.zIndex = "9999";
+        saveIndicator.textContent = "Guardando...";
+        document.body.appendChild(saveIndicator);
+        
+        // Actualizar los datos en el servidor
+        actualizarDatos(datosActuales).then(() => {
+          // Actualizar mensaje de guardado exitoso
+          saveIndicator.textContent = "¡Guardado con éxito!";
+          saveIndicator.style.backgroundColor = "#4CAF50";
+          
+          // Eliminar el indicador después de 2 segundos
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+          
+          // Cerrar modal
+          cerrarModalEspecifico(modalId);
+          
+          // Actualizar vista
+          mostrarGestionAcciones();
+        }).catch(error => {
+          console.error("Error al guardar datos:", error);
+          saveIndicator.textContent = "Error al guardar";
+          saveIndicator.style.backgroundColor = "#F44336";
+          
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+        });
+        
+        console.log("Acción guardada:", nuevaAccion);
+      } catch (error) {
+        console.error("Error al guardar la acción:", error);
+        alert("Error al guardar la acción. Por favor intente nuevamente.");
+      }
+    }
+
+    // Función para mostrar una sección específica
+    function mostrarSeccion(seccion) {
+      console.log("mostrarSeccion llamada con:", seccion);
+      
+      // Ocultar todas las secciones
+      document.querySelectorAll('section').forEach(s => {
+        s.classList.add('hidden');
+      });
+      
+      // Mostrar la sección seleccionada
+      const seccionElement = document.getElementById(seccion);
+      if (seccionElement) {
+        seccionElement.classList.remove('hidden');
+        
+        // Actualizar navegación activa
+        document.querySelectorAll('nav a').forEach(a => {
+          a.classList.remove('active');
+        });
+        
+        const navActivo = document.getElementById(`nav-${seccion}`);
+        if (navActivo) {
+          navActivo.classList.add('active');
+        }
+        
+        // Cargar el contenido específico
+        if (seccion === 'conflictos') {
+          mostrarConflictos();
+        } else if (seccion === 'acciones') {
+          mostrarAcciones();
+        } else if (seccion === 'admin') {
+          // No hacer nada especial para admin
+        }
+      } else {
+        console.error("No se encontró el elemento para la vista:", seccion);
+      }
+    }
+
+    // Función para calcular el tiempo transcurrido en formato legible
+    function calcularTiempoTranscurrido(fecha) {
+      const fechaAccion = new Date(fecha);
+      const ahora = new Date();
+      
+      const diferenciaEnMilisegundos = ahora - fechaAccion;
+      const diferenciaEnHoras = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60));
+      const diferenciaEnDias = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24));
+
+      if (diferenciaEnHoras < 1) return "Hace menos de una hora";
+      if (diferenciaEnHoras === 1) return "Hace 1 hora";
+      if (diferenciaEnHoras < 24) return `Hace ${diferenciaEnHoras} horas`;
+      if (diferenciaEnDias === 1) return "Hace 1 día";
+      return `Hace ${diferenciaEnDias} días`;
+    }
+
+    // Función para cargar listas en el panel de administración
+    function cargarListaPartes() {
+      const contenedor = document.getElementById('lista-partes');
+      if (!contenedor) {
+        console.error("No se encontró el contenedor de lista de partes");
+        return;
+      }
+      
+      contenedor.innerHTML = '';
+      
+      if (!datosActuales || !datosActuales.entidades) {
+        contenedor.innerHTML = "<p>No hay entidades disponibles</p>";
+        return;
+      }
+      
+      datosActuales.entidades.forEach(entidad => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>${entidad.nombre}</strong> (${entidad.tipo})
+            </div>
+            <div>
+              <button onclick="editarEntidad(${entidad.id})">Editar</button>
+              <button onclick="eliminarParte(${entidad.id})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function cargarListaPersonas() {
+      const contenedor = document.getElementById('lista-personas');
+      if (!contenedor) {
+        console.error("No se encontró el contenedor de lista de personas");
+        return;
+      }
+      
+      contenedor.innerHTML = '';
+      
+      if (!datosActuales || !datosActuales.personas) {
+        contenedor.innerHTML = "<p>No hay personas disponibles</p>";
+        return;
+      }
+      
+      datosActuales.personas.forEach(persona => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>${persona.nombre}</strong> (${persona.rol || 'Sin rol'})
+            </div>
+            <div>
+              <button onclick="editarPersona(${persona.id})">Editar</button>
+              <button onclick="eliminarPersona(${persona.id})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
     }
   </script>
 </body>

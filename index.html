@@ -468,6 +468,85 @@
     // Mantener el resto de las funciones existentes...
     // (mostrarConflictos, calcularDuracion, capitalizarPrimeraLetra, etc.)
 
+    function mostrarFichaElemento(tipo, id) {
+      const modal = document.getElementById('modal');
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalTitulo = document.getElementById('modal-titulo');
+      const modalContenido = document.getElementById('modal-contenido');
+    
+      if (tipo === 'conflicto') {
+        mostrarFichaConflicto(id, modalTitulo, modalContenido);
+      } else if (tipo === 'accion') {
+        mostrarFichaAccion(id, modalTitulo, modalContenido);
+      }
+    
+      modal.classList.remove('hidden');
+      modalOverlay.classList.remove('hidden');
+    }
+    
+    function mostrarFichaConflicto(id, modalTitulo, modalContenido) {
+      const conflicto = datosActuales.conflictos.find(c => c.id === id);
+      if (!conflicto) return;
+    
+      const fechaInicio = new Date(conflicto.fecha_inicio);
+      const diasTranscurridos = Math.floor((new Date() - fechaInicio) / (1000 * 60 * 60 * 24));
+    
+      const acciones = datosActuales.acciones
+        .filter(a => a.id_conflicto === id)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+      modalTitulo.textContent = conflicto.titulo;
+      
+      modalContenido.innerHTML = `
+        <div class="recuadro">
+          <p><strong>Descripción:</strong> ${conflicto.descripcion}</p>
+          <p><strong>Fecha de inicio:</strong> ${fechaInicio.toLocaleDateString('es-ES')}</p>
+          <p><strong>Duración:</strong> ${diasTranscurridos} días</p>
+          <p><strong>Estado:</strong> ${conflicto.estado || 'En curso'}</p>
+        </div>
+        <div class="recuadro">
+          <h4>Acciones relacionadas (${acciones.length})</h4>
+          ${acciones.map(accion => `
+            <div class="card">
+              <p><strong>${capitalizarPrimeraLetra(accion.tipo_accion)}</strong> - ${new Date(accion.fecha).toLocaleDateString('es-ES')}</p>
+              <p>${accion.descripcion}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    function mostrarFichaAccion(id, modalTitulo, modalContenido) {
+      const accion = datosActuales.acciones.find(a => a.id === id);
+      if (!accion) return;
+    
+      const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+      const entidades = accion.entidades_relacionadas
+        ? accion.entidades_relacionadas
+          .map(idEnt => datosActuales.entidades.find(e => e.id === idEnt))
+          .filter(e => e)
+          .map(e => e.nombre)
+          .join(", ")
+        : 'No especificadas';
+    
+      modalTitulo.textContent = capitalizarPrimeraLetra(accion.tipo_accion);
+      
+      modalContenido.innerHTML = `
+        <div class="recuadro">
+          <p><strong>Fecha:</strong> ${new Date(accion.fecha).toLocaleDateString('es-ES')}</p>
+          <p><strong>Descripción:</strong> ${accion.descripcion}</p>
+          <p><strong>Conflicto relacionado:</strong> ${conflicto ? conflicto.titulo : 'No especificado'}</p>
+          <p><strong>Entidades involucradas:</strong> ${entidades}</p>
+        </div>
+      `;
+    }
+    
+    function cerrarModal() {
+      const modal = document.getElementById('modal');
+      const modalOverlay = document.getElementById('modal-overlay');
+      modal.classList.add('hidden');
+      modalOverlay.classList.add('hidden');
+    }
   </script>
 </body>
 </html>

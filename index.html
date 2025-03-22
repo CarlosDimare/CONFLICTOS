@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeClase</title>
+  <title>Conflictos</title>
+  <meta http-equiv="Permissions-Policy" content="bluetooth=(self)">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap');
     
@@ -23,36 +24,88 @@
     }
     
     body {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Roboto Condensed', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
+      background-color: var(--color-light);
+      color: var(--color-dark);
+      line-height: 1.6;
     }
     
     header {
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      padding: 0.5rem;
+      background-color: var(--color-primary);
+      color: var(--color-light);
+      padding: 1.5rem;
       text-align: center;
-      font-size: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
     }
+    
+    header h1 {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.05),
+        rgba(0, 0, 0, 0.05) 10px,
+        rgba(0, 0, 0, 0) 10px,
+        rgba(0, 0, 0, 0) 20px
+      );
+      z-index: 0;
+    }
+    
     nav {
       display: flex;
       justify-content: center;
-      background-color: #34495e;
-      border-bottom: 2px solid #2980b9;
+      background-color: var(--color-dark);
+      border-bottom: 3px solid var(--color-primary);
     }
+    
     nav a {
-      color: #ecf0f1;
-      padding: 1rem 1.5rem;
+      color: var(--color-light);
+      padding: 1.2rem 2.5rem;
       text-decoration: none;
-      font-weight: bold;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+      position: relative;
+      transition: all 0.3s ease;
     }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 3px;
+      background-color: var(--color-primary);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    
     nav a:hover {
-      background-color: #2980b9;
-      color: white;
+      background-color: rgba(198, 40, 40, 0.1);
     }
+    
+    nav a:hover::after {
+      width: 80%;
+    }
+    
     nav a.active {
       background-color: rgba(198, 40, 40, 0.2);
     }
@@ -71,19 +124,26 @@
     }
     
     .card {
-      background-color: #ffffff;
-      border: 1px solid #bdc3c7;
-      border-radius: 8px;
+      background-color: white;
+      border-left: 4px solid var(--color-primary);
+      border-radius: 2px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: all 0.3s ease;
+      position: relative;
     }
     
     .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card h3 {
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      color: var(--color-dark);
     }
     
     .form-group {
@@ -93,35 +153,52 @@
     .form-group label {
       display: block;
       margin-bottom: 0.5rem;
-      color: #2c3e50;
-      font-weight: bold;
+      color: var(--color-primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
     }
     
     .form-group input,
     .form-group textarea,
     .form-group select {
       width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #bdc3c7;
-      border-radius: 4px;
-      background-color: #ecf0f1;
-      color: #333;
-      font-size: 1rem;
+      padding: 0.8rem;
+      border: 1px solid var(--color-light-gray);
+      border-radius: 2px;
+      background-color: white;
+      color: var(--color-dark);
+      font-family: 'Roboto Condensed', sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.1);
     }
     
     button {
-      background-color: #2980b9;
+      background-color: var(--color-primary);
       color: white;
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 4px;
+      padding: 0.8rem 1.5rem;
+      border-radius: 2px;
       cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.2s;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto Condensed', sans-serif;
     }
     
     button:hover {
-      background-color: #3498db;
+      background-color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     
     .hidden {
@@ -147,20 +224,37 @@
     }
     
     .modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      border-left: 4px solid var(--color-primary);
-      border-radius: 2px;
-      padding: 2rem;
-      z-index: 1000;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 600px;
-      border-left: 8px solid #c62828;
-      border-radius: 0;
+      display: none; /* Oculto por defecto */
+      position: fixed; /* Fijo en la pantalla */
+      z-index: 1000; /* Por encima de otros elementos */
+      left: 0;
+      top: 0;
+      width: 100%; /* Ancho completo */
+      height: 100%; /* Alto completo */
+      overflow: auto; /* Habilitar scroll si es necesario */
+      background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con opacidad */
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto; /* Centrado automáticamente en vertical y horizontal */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%; /* Ancho del modal */
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      animation-name: animatetop;
+      animation-duration: 0.4s;
+      position: relative; /* Posición relativa para centrado vertical */
+      top: 50%; /* Mover hacia abajo al 50% de la altura de la ventana */
+      transform: translateY(-50%); /* Desplazar hacia arriba en 50% de su propia altura */
+      transform: scale(1.2); /* Aumentar tamaño en un 20% */
+      transform-origin: center; /* Asegurar que el escalado sea centrado */
+    }
+    
+    /* Animación para que el modal aparezca deslizándose desde arriba */
+    @keyframes animatetop {
+      from {top: -300px; opacity: 0}
+      to {top: 50%; opacity: 1}
     }
     
     .modal-overlay {
@@ -171,7 +265,11 @@
       height: 100%;
       background-color: rgba(0, 0, 0, 0.7);
       z-index: 999;
-      backdrop-filter: blur(3px);
+    }
+    
+    .modal-content {
+      max-height: 80vh;
+      overflow-y: auto;
     }
     
     .clickable {
@@ -234,13 +332,16 @@
     }
     
     .accion-card {
-      background-color: #ffffff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      background-color: white;
+      border-left: 4px solid var(--color-primary);
+      border-radius: 2px;
       padding: 1.5rem;
-      margin-bottom: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       cursor: pointer;
+      text-decoration: none !important;
+      transition: all 0.3s ease;
+      position: relative;
     }
     
     .accion-card:hover {
@@ -253,18 +354,114 @@
     }
     
     .accion-fecha {
-      color: #f71616;
+      color: var(--color-primary);
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
       font-size: 0.9rem;
-      font-weight: 500;
+      letter-spacing: 1px;
     }
-    .acciones-contenedor {
-      display: grid;
-      gap: 1.5rem;
-      padding: 1rem;
+    
+    /* Elementos geométricos decorativos */
+    .seccion {
+      position: relative;
     }
-    .accion-card h3 {
-      color: #2c3e50;
-      margin-bottom: 0.5rem;
+    
+    .seccion::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      width: 40px;
+      height: 40px;
+      border-top: 4px solid var(--color-primary);
+      border-left: 4px solid var(--color-primary);
+      z-index: -1;
+      opacity: 0.5;
+    }
+    
+    /* Estilos para tablas */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    
+    th {
+      text-align: left;
+      padding: 0.8rem;
+      background-color: rgba(198, 40, 40, 0.05);
+      color: var(--color-primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      border-bottom: 2px solid var(--color-primary);
+      width: 30%;
+    }
+    
+    td {
+      padding: 0.8rem;
+      border-bottom: 1px solid var(--color-light-gray);
+    }
+    
+    /* Estilos para listas */
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    li {
+      padding: 0.5rem 0;
+    }
+    
+    /* Estilos para el dashboard de admin */
+    #admin-dashboard {
+      background-color: white;
+      border-radius: 2px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .seccion {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    /* Botón de cambio de vista */
+    .view-toggle {
+      display: none;
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+    
+    .view-toggle:hover {
+      background-color: var(--color-accent);
+      transform: scale(1.05);
+    }
+    
+    /* Estilos para vista compacta */
+    .compact-view .card,
+    .compact-view .accion-card {
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
     }
     
     .compact-view .card h3,
@@ -373,6 +570,91 @@
         font-size: 0.8rem;
       }
     }
+
+    /* Estilos básicos para la interfaz */
+    .hidden { display: none; }
+    .card { border: 1px solid #ccc; padding: 10px; margin: 10px; border-radius: 5px; }
+    .btn { padding: 5px 10px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background-color: #0056b3; }
+
+    /* Estilos para el modal */
+    .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed; /* Fijo en la pantalla */
+        z-index: 1000; /* Por encima de otros elementos */
+        left: 0;
+        top: 0;
+        width: 100%; /* Ancho completo */
+        height: 100%; /* Alto completo */
+        overflow: auto; /* Habilitar scroll si es necesario */
+        background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con opacidad */
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto; /* Centrado automáticamente en vertical y horizontal */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%; /* Ancho del modal */
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        animation-name: animatetop;
+        animation-duration: 0.4s;
+        position: relative; /* Posición relativa para centrado vertical */
+        top: 50%; /* Mover hacia abajo al 50% de la altura de la ventana */
+        transform: translateY(-50%); /* Desplazar hacia arriba en 50% de su propia altura */
+        transform: scale(1.2); /* Aumentar tamaño en un 20% */
+        transform-origin: center; /* Asegurar que el escalado sea centrado */
+    }
+
+    /* Animación para que el modal aparezca deslizándose desde arriba */
+    @keyframes animatetop {
+        from {top: -300px; opacity: 0}
+        to {top: 50%; opacity: 1}
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Estilos base para dispositivos más grandes */
+    .modal-content {
+        width: 50%; /* Tamaño original para dispositivos grandes */
+    }
+
+    /* Media query para dispositivos pequeños (menos de 768px) */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 90%; /* Ajustar el ancho para dispositivos pequeños */
+        }
+    }
+
+    /* Ajustes para la ficha de conflictos en dispositivos pequeños */
+    @media (max-width: 768px) {
+        .conflictos-container {
+            flex-direction: column;
+        }
+    }
+
+    /* CSS para la ficha de conflictos */
+    .conflictos-container {
+        display: flex;
+        flex-direction: column; /* Asegura disposición vertical */
+        width: 100%; /* Utiliza todo el ancho disponible */
+    }
+
+    .conflictos-info, .linea-tiempo {
+        width: 100%; /* Cada elemento hijo ocupa el ancho completo */
+    }
   </style>
 </head>
 <body>
@@ -382,7 +664,6 @@
   <nav>
     <a href="#" onclick="mostrarSeccion('conflictos')" id="nav-conflictos">Conflictos</a>
     <a href="#" onclick="mostrarSeccion('acciones')" id="nav-acciones">Acciones</a>
-    <a href="#" onclick="mostrarSeccion('admin')" id="nav-admin">Admin</a>
   </nav>
   <main class="container">
     <!-- Sección Inicio -->
@@ -400,7 +681,8 @@
 
     <!-- Sección Acciones -->
     <section id="acciones" class="seccion">
-      <div id="acciones-contenedor"></div>
+      <div id="acciones-contenedor">
+           </div>
     </section>
 
     <!-- Sección Admin -->
@@ -504,6 +786,14 @@
   <!-- Font Awesome para iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+  <!-- Modal para la ficha de acción -->
+  <div id="ficha-accion-modal" class="modal">
+      <div class="modal-content">
+          <span class="close" onclick="cerrarFichaAccion()">&times;</span>
+          <div id="ficha-accion-view"></div>
+      </div>
+  </div>
+
   <script>
     const BASE_URL = "https://api.jsonbin.io/v3/b/67b7af37e41b4d34e49614cb";
     const API_KEY = "$2a$10$g6sH3FZZb2lLbX6sdlo7Eeq4pSp3prxRk//ZurGqxwpFs2jECn.US";
@@ -551,74 +841,38 @@
       mostrarConflictos();
     }
 
-    // Función para inicializar la navegación
-    function inicializarNavegacion() {
-      console.log("Inicializando navegación");
+    function mostrarSeccion(seccion) {
+      // Ocultar todas las secciones primero
+      const secciones = ['conflictos', 'acciones', 'admin']
+      secciones.forEach(sec => {
+        const elemento = document.getElementById(sec)
+        if (elemento) elemento.classList.add('hidden')
+      })
       
-      // Configurar los enlaces de navegación
-      const enlaces = document.querySelectorAll('nav a');
-      enlaces.forEach(enlace => {
-        enlace.addEventListener('click', function(e) {
-          e.preventDefault();
-          
-          // Remover clase activa de todos los enlaces
-          enlaces.forEach(el => el.classList.remove('active'));
-          
-          // Agregar clase activa al enlace actual
-          this.classList.add('active');
-          
-          // Determinar qué sección mostrar
-          let vista;
-          if (this.getAttribute('data-nav') === 'conflictos' || this.getAttribute('href') === '#conflictos') {
-            vista = 'lista-conflictos';
-          } else if (this.getAttribute('data-nav') === 'acciones' || this.getAttribute('href') === '#acciones') {
-            vista = 'gestion-acciones';
-          } else if (this.getAttribute('data-nav') === 'partes' || this.getAttribute('href') === '#partes') {
-            vista = 'gestion-partes';
-          } else if (this.getAttribute('data-nav') === 'personas' || this.getAttribute('href') === '#personas') {
-            vista = 'gestion-personas';
-          } else {
-            vista = this.getAttribute('data-seccion') || this.getAttribute('href').substring(1);
-          }
-          
-          console.log("Mostrando vista:", vista);
-          
-          // Ocultar todas las vistas
-          document.querySelectorAll('.vista-principal').forEach(v => {
-            v.classList.add('hidden');
-          });
-          
-          // Mostrar la vista seleccionada
-          const vistaElement = document.getElementById(vista);
-          if (vistaElement) {
-            vistaElement.classList.remove('hidden');
-            
-            // Cargar datos específicos según la vista
-            if (vista === 'lista-conflictos') {
-              mostrarListaConflictos();
-            } else if (vista === 'gestion-acciones') {
-              mostrarGestionAcciones();
-            } else if (vista === 'gestion-partes') {
-              mostrarGestionPartes();
-            } else if (vista === 'gestion-personas') {
-              mostrarGestionPersonas();
-            }
-          } else {
-            console.error("No se encontró el elemento para la vista:", vista);
-          }
-        });
-      });
-      
-      // Mostrar la vista de conflictos por defecto
-      const defaultLink = document.querySelector('nav a[data-nav="conflictos"]') || 
-                          document.querySelector('nav a[href="#conflictos"]') ||
-                          document.querySelector('nav a');
-      
-      if (defaultLink) {
-        defaultLink.click();
-      } else {
-        console.error("No se encontró ningún enlace de navegación");
+      // Mostrar la sección seleccionada
+      const seccionSeleccionada = document.getElementById(seccion)
+      if (seccionSeleccionada) {
+        seccionSeleccionada.classList.remove('hidden')
       }
+      
+      // Actualizar navegación activa
+      document.querySelectorAll('nav a').forEach(a => {
+        a.classList.remove('active')
+      })
+      const navActivo = document.getElementById(`nav-${seccion}`)
+      if (navActivo) {
+        navActivo.classList.add('active')
+      }
+
+      // Cargar el contenido específico
+      if (seccion === 'conflictos') {
+        mostrarConflictos()
+      } else if (seccion === 'acciones') {
+        mostrarAcciones()
+      }
+
+      // Prevenir el comportamiento por defecto del enlace
+      return false
     }
 
     function toggleView() {
@@ -660,29 +914,28 @@
     }
 
     function mostrarConflictos() {
-      console.log("Mostrando conflictos");
-      const contenedor = document.getElementById("lista-conflictos");
-      contenedor.innerHTML = "";
+      const contenedor = document.getElementById("lista-conflictos")
+      contenedor.innerHTML = ""
       
       if (datosActuales && datosActuales.conflictos && datosActuales.conflictos.length > 0) {
         const conflictosOrdenados = datosActuales.conflictos.map(conflicto => {
-          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id);
+          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id)
           const ultimaAccion = acciones.length > 0 
             ? acciones.reduce((a, b) => new Date(a.fecha) > new Date(b.fecha) ? a : b)
-            : null;
+            : null
           return {
             ...conflicto,
             ultimaAccion
-          };
+          }
         }).sort((a, b) => {
-          if (!a.ultimaAccion) return 1;
-          if (!b.ultimaAccion) return -1;
-          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha);
-        });
+          if (!a.ultimaAccion) return 1
+          if (!b.ultimaAccion) return -1
+          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha)
+        })
 
         conflictosOrdenados.forEach((conflicto) => {
-          const card = document.createElement("div");
-          card.className = "card";
+          const card = document.createElement("div")
+          card.className = "card"
           // Calcular duración considerando si está resuelto o no
           const duracion = calcularDuracion(
             conflicto.fecha_inicio, 
@@ -692,40 +945,87 @@
           // Determinar el color del indicador de estado
           const estadoColor = conflicto.estado === "resuelto" ? "#4CAF50" : "#f71616";
           
-          let ultimaAccionTexto = '';
+          let ultimaAccionTexto = ''
           if (conflicto.ultimaAccion) {
             const diasDesdeUltimaAccion = Math.floor(
               (new Date() - new Date(conflicto.ultimaAccion.fecha)) / (1000 * 60 * 60 * 24)
-            );
+            )
             ultimaAccionTexto = `
               <div class="ultima-accion">
                 <span style="color: #f71616;">Última acción | </span>
                 <span style="color: #f71616;">${capitalizarPrimeraLetra(conflicto.ultimaAccion.tipo_accion)}</span>
                 <span style="color: #f71616;"> hace ${diasDesdeUltimaAccion} días</span>
-              </div>`;
+              </div>`
           }
-          
+
           card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div>
-                <p style="color: #f71616; font-weight: bold; margin-bottom: 8px;">Día ${duracion}</p>
-                <h3>${conflicto.titulo}</h3>
-                <p>${conflicto.descripcion.substring(0, 150)}${conflicto.descripcion.length > 150 ? '...' : ''}</p>
-                ${ultimaAccionTexto}
-              </div>
-              <div style="margin-left: 15px;">
-                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${estadoColor};"></span>
-                <span style="font-size: 0.9em; color: ${estadoColor};">${capitalizarPrimeraLetra(conflicto.estado)}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="margin: 0;">${conflicto.titulo}</h3>
+              <div style="display: flex; align-items: center;">
+                <span class="estado-indicador" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${estadoColor}; margin-right: 8px;"></span>
+                <span style="color: #f71616; font-weight: bold;">Día ${duracion}</span>
               </div>
             </div>
-          `;
-          
-          card.onclick = () => mostrarFichaConflicto(conflicto.id);
-          contenedor.appendChild(card);
-        });
+            <p>${vistaCompacta ? conflicto.descripcion.substring(0, 80) + '...' : conflicto.descripcion}</p>
+            ${ultimaAccionTexto}
+          `
+          card.onclick = () => mostrarFichaConflicto(conflicto.id)
+          contenedor.appendChild(card)
+        })
       } else {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
+        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>"
       }
+    }
+
+    // Función para mostrar la ficha de una acción
+    function mostrarFichaAccion(id) {
+        console.log("Intentando mostrar la ficha para la acción con ID:", id);
+        const accion = datosActuales.acciones.find(a => a.id === id);
+        if (!accion) {
+            console.error("Acción no encontrada:", id);
+            return;
+        }
+
+        console.log("Acción encontrada:", accion);
+
+        const fechaAccion = new Date(accion.fecha);
+        const tiempoTranscurrido = calcularTiempoTranscurrido(fechaAccion);
+
+        const fichaAccionView = document.getElementById('ficha-accion-view');
+        if (fichaAccionView) {
+            fichaAccionView.innerHTML = `
+                <h3>${accion.tipo_accion} | ${tiempoTranscurrido}</h3>
+                <iframe src="${accion.fuente}" width="100%" height="400px" style="border: none;"></iframe>
+            `;
+
+            const modal = document.getElementById('ficha-accion-modal');
+            modal.style.display = "block";
+        } else {
+            console.error("Elemento ficha-accion-view no encontrado en el DOM.");
+        }
+    }
+
+    // Función para cerrar el modal
+    function cerrarModalEspecifico(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = modal.previousElementSibling;
+        modal.remove();
+        overlay.remove();
+    }
+
+    // Función para calcular el tiempo transcurrido
+    function calcularTiempoTranscurrido(fecha) {
+        const ahora = new Date();
+        const diferencia = ahora - fecha; // Diferencia en milisegundos
+        const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+        
+        if (dias < 1) {
+            return "hace menos de un día";
+        } else if (dias === 1) {
+            return "hace 1 día";
+        } else {
+            return `hace ${dias} días`;
+        }
     }
 
     // Función para mostrar la ficha de un conflicto
@@ -742,14 +1042,23 @@
         conflicto.estado === "resuelto" ? conflicto.fecha_fin : null
       );
 
-      const modalId = `modal-ficha-conflicto-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
+      // Ocultar la lista de conflictos
+      const listaConflictos = document.getElementById('lista-conflictos');
+      if (listaConflictos) {
+        listaConflictos.style.display = 'none';
+      }
 
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
+      // Crear o actualizar la vista de ficha de conflicto
+      let fichaConflictoView = document.getElementById('ficha-conflicto-view');
+      if (!fichaConflictoView) {
+        fichaConflictoView = document.createElement('div');
+        fichaConflictoView.id = 'ficha-conflicto-view';
+        fichaConflictoView.className = 'vista-principal';
+        document.querySelector('main').appendChild(fichaConflictoView);
+      }
+
+      // Asegurarse de que la ficha sea visible
+      fichaConflictoView.style.display = 'block';
 
       // Obtener acciones relacionadas
       const accionesConflicto = datosActuales.acciones
@@ -757,74 +1066,101 @@
         .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
       // Crear línea de tiempo de acciones
-      const timelineHTML = accionesConflicto.map(accion => {
+      const accionesHTML = accionesConflicto.map(accion => {
         const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
+        const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
+        
         return `
-          <div class="timeline-item">
-            <div class="timeline-date">Día ${diaAccion}</div>
-            <div class="timeline-content">
-              <h4>${capitalizarPrimeraLetra(accion.tipo_accion)}</h4>
-              <p>${accion.descripcion}</p>
+          <div class="accion-item" onclick="mostrarFichaAccion(${accion.id})" style="cursor: pointer; margin-bottom: 15px; padding: 15px; border-radius: 8px; background-color: #f9f9f9; border-left: 4px solid var(--color-primary);">
+            <div style="margin-bottom: 5px;">
+              <span style="font-weight: bold; color: #f71616;">Día ${diaAccion} (${tiempoTranscurrido})</span>
+            </div>
+            <div>
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
+              <span style="margin: 0 5px;">|</span>
+              <span>${accion.descripcion}</span>
             </div>
           </div>
         `;
       }).join('');
 
-      modal.innerHTML = `
-        <div class="modal-header">
-          <h3>${conflicto.titulo}</h3>
-          <span class="estado-badge" style="background-color: ${conflicto.estado === 'resuelto' ? '#4CAF50' : '#f71616'}">
-            ${capitalizarPrimeraLetra(conflicto.estado)}
-          </span>
-        </div>
-        <div class="modal-content">
-          <div class="info-section">
-            <p><strong>Duración: ${duracionDias} días</strong></p>
-            <p><strong>Fecha de inicio:</strong> ${conflicto.fecha_inicio}</p>
-            ${conflicto.estado === 'resuelto' ? `<p><strong>Fecha de resolución:</strong> ${conflicto.fecha_fin}</p>` : ''}
-            <p>${conflicto.descripcion}</p>
+      // Obtener entidades relacionadas
+      const entidadesRelacionadas = conflicto.entidades_involucradas
+        ? conflicto.entidades_involucradas
+            .map(id => datosActuales.entidades.find(e => e.id === id))
+            .filter(e => e)
+            .map(e => e.nombre)
+            .join(", ")
+        : "No especificadas";
+
+      // Actualizar el contenido de la ficha
+      fichaConflictoView.innerHTML = `
+        <div class="container" style="padding-top: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>${conflicto.titulo}</h2>  <span style="font-weight: bold; font-size: 1.6em;">Día ${duracionDias}</span>
+           
           </div>
-          <div class="timeline-section">
-            <h4>Línea de tiempo</h4>
-            <div class="timeline">
-              ${timelineHTML}
+          
+          <div style="display: block;">
+            <!-- Información del conflicto en una sola columna -->
+            <div style="margin-bottom: 20px; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span class="estado-badge" style="background-color: ${conflicto.estado === 'resuelto' ? '#4CAF50' : '#f71616'}; padding: 5px 10px; border-radius: 4px; color: white;">
+                  ${capitalizarPrimeraLetra(conflicto.estado)}
+                </span>
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <p><strong>Inicio</strong> ${conflicto.fecha_inicio}</p>
+                ${conflicto.estado === 'resuelto' ? `<p><strong>Fecha de resolución:</strong> ${conflicto.fecha_fin}</p>` : ''}
+                <p><strong>Ubicación</strong> ${conflicto.ubicacion || 'No especificada'}</p>
+                <p><strong>Partes</strong> ${entidadesRelacionadas}</p>
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <h4>Descripción</h4>
+                <p>${conflicto.descripcion}</p>
+              </div>
+                         
+            </div>
+            
+            <!-- Línea de tiempo en la misma columna -->
+            <div style="padding: 20px;">
+              <h3 style="margin-bottom: 15px;">Cronología</h3>
+              <div class="acciones-lista">
+                ${accionesConflicto.length > 0 ? accionesHTML : '<p>No hay acciones registradas para este conflicto.</p>'}
+              </div>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
-        </div>
       `;
-
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
     }
 
-    // Función para cerrar un modal específico
-    function cerrarModalEspecifico(modalId) {
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        const overlay = modal.previousElementSibling;
-        if (overlay && overlay.className === "modal-overlay") {
-          overlay.remove();
-        }
-        modal.remove();
+    // Función para volver a la vista anterior
+    function volverAVistaAnterior() {
+      // Ocultar la ficha de conflicto
+      const fichaConflictoView = document.getElementById('ficha-conflicto-view');
+      if (fichaConflictoView) {
+        fichaConflictoView.style.display = 'none';
       }
-    }
-
-    function calcularTiempoTranscurrido(fecha) {
-      const fechaAccion = new Date(fecha);
-      const ahora = new Date();
       
-      const diferenciaEnMilisegundos = ahora - fechaAccion;
-      const diferenciaEnHoras = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60));
-      const diferenciaEnDias = Math.floor(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24));
+      // Ocultar la ficha de acción
+      const fichaAccionView = document.getElementById('ficha-accion-view');
+      if (fichaAccionView) {
+        fichaAccionView.style.display = 'none';
+      }
       
-      if (diferenciaEnHoras < 1) return "Hace menos de una hora";
-      if (diferenciaEnHoras === 1) return "Hace 1 hora";
-      if (diferenciaEnHoras < 24) return `Hace ${diferenciaEnHoras} horas`;
-      if (diferenciaEnDias === 1) return "Hace 1 día";
-      return `Hace ${diferenciaEnDias} días`;
+      // Mostrar la lista de conflictos
+      const listaConflictos = document.getElementById('lista-conflictos');
+      if (listaConflictos) {
+        listaConflictos.style.display = 'block'; // Mostrar la lista de conflictos
+      }
+      
+      // Mostrar la lista de acciones si es necesario
+      const listaAcciones = document.getElementById('lista-acciones');
+      if (listaAcciones) {
+        listaAcciones.style.display = 'block'; // Mostrar la lista de acciones
+      }
     }
 
     function mostrarFichaElemento(tipo, id) {
@@ -843,8 +1179,8 @@
         elemento = datosActuales.acciones.find(a => a.id === id)
         if (elemento) {
           const conflicto = datosActuales.conflictos.find(c => c.id === elemento.id_conflicto)
-          const entidadesAccion = elemento.entidades_relacionadas
-            ? elemento.entidades_relacionadas
+          const entidadesAccion = elemento.entidades_involucradas
+            ? elemento.entidades_involucradas
               .map(idEnt => datosActuales.entidades.find(e => e.id === idEnt))
               .filter(e => e)
               .map(e => e.nombre)
@@ -912,8 +1248,8 @@
         if (elemento) {
           let entidadesPersona = 'No hay entidades asociadas'
           
-          if (elemento.entidades_relacionadas) {
-            entidadesPersona = elemento.entidades_relacionadas
+          if (elemento.entidades_involucradas) {
+            entidadesPersona = elemento.entidades_involucradas
               .map(idEnt => datosActuales.entidades.find(e => e.id === idEnt))
               .filter(e => e)
               .map(e => `<li class="clickable" onclick="mostrarFichaElemento('entidad', ${e.id})">${e.nombre}</li>`)
@@ -1102,30 +1438,19 @@
     }
 
     function mostrarListaConflictos() {
-      mostrarSeccion("admin");
-      document.getElementById("lista-conflictos-admin").classList.remove("hidden");
+      // Ocultar todas las vistas principales
+      document.querySelectorAll('.vista-principal').forEach(vista => {
+        vista.style.display = 'none';
+      });
 
-      const contenedor = document.getElementById("conflictos-lista");
-      contenedor.innerHTML = "";
-
-      if (datosActuales && datosActuales.conflictos && datosActuales.conflictos.length > 0) {
-        datosActuales.conflictos.forEach((conflicto) => {
-          const card = document.createElement("div");
-          card.className = "card";
-          const duracion = calcularDuracion(conflicto.fecha_inicio);
-
-          card.innerHTML = `
-            <p style="color: #f71616; font-weight: bold; margin-bottom: 8px;">Día ${duracion}</p>
-            <h3>${conflicto.titulo}</h3>
-            <p>${conflicto.descripcion}</p>
-            <button onclick="editarConflicto(${conflicto.id})">Editar</button>
-            <button onclick="eliminarConflicto(${conflicto.id})">Eliminar</button>
-          `;
-          contenedor.appendChild(card);
-        });
-      } else {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
+      // Mostrar la lista de conflictos
+      const listaConflictos = document.getElementById('lista-conflictos');
+      if (listaConflictos) {
+        listaConflictos.style.display = 'block';
       }
+
+      // Lógica para cargar y mostrar los conflictos
+      // ... (código para cargar conflictos)
     }
 
     function editarConflicto(id) {
@@ -1151,8 +1476,9 @@
       alert("Conflicto eliminado con éxito.");
     }
 
+    // Función para mostrar acciones (versión original que necesita ser actualizada)
     function mostrarAcciones() {
-      console.log("Mostrando acciones");
+      console.log("Mostrando acciones (función original)");
       const contenedor = document.getElementById("acciones-contenedor");
       if (!contenedor) {
         console.error("No se encontró el contenedor de acciones");
@@ -1175,429 +1501,32 @@
       );
       
       accionesOrdenadas.forEach(accion => {
-        const conflicto = accion.id_conflicto 
-          ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
-          : null;
+        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+        if (!conflicto) return; // Saltar si no hay conflicto asociado
         
         const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
         
         const card = document.createElement("div");
-        card.className = "card";
-        card.style.cursor = "pointer";
+        card.className = "accion-card";
         
         card.innerHTML = `
-          <div style="margin-bottom: 10px; color: var(--color-primary); font-weight: bold;">
-            ${tiempoTranscurrido.replace(/^hace/i, 'Hace')}
-          </div>
-          <div style="margin-bottom: 8px;">
-            <strong>${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</strong> | ${accion.descripcion || 'Sin descripción'}
-          </div>
-          ${conflicto ? `
-            <div style="font-size: 0.9em; color: #666;">
-              ${conflicto.titulo}
+          <div style="display: flex; flex-direction: column;">
+            <div style="margin-bottom: 10px;">
+              <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
-          ` : ''}
+            <div style="margin-bottom: 10px;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
+              <span style="margin: 0 5px;">|</span>
+              <span>${accion.descripcion || 'Sin descripción'}</span>
+            </div>
+            <div style="margin-top: 5px; font-size: 0.9em;">
+              <span style="color: #666;">Conflicto: </span>
+              <span>${conflicto.titulo}</span>
+            </div>
+          </div>
         `;
         
         card.onclick = () => mostrarFichaAccion(accion.id);
-        fragment.appendChild(card);
-      });
-      
-      contenedor.appendChild(fragment);
-    }
-
-    // Función para mostrar ficha de acción
-    function mostrarFichaAccion(id) {
-      const accion = datosActuales.acciones.find((a) => a.id === id);
-      if (!accion) return;
-
-      // Crear un modal para mostrar la ficha
-      const modalId = `modal-ficha-accion-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
-      modal.style.width = "90%";
-      modal.style.maxWidth = "800px";
-
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
-
-      // Calcular tiempo transcurrido
-      const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
-      
-      // Obtener conflicto relacionado
-      const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
-      
-      // Obtener entidades relacionadas
-      const entidadesRelacionadas = accion.entidades_relacionadas 
-        ? accion.entidades_relacionadas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
-        : [];
-
-      modal.innerHTML = `
-        <div style="padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">${capitalizarPrimeraLetra(accion.tipo_accion)}</h2>
-            <span style="color: var(--color-primary); font-weight: bold;">${tiempoTranscurrido}</span>
-          </div>
-          
-          <div style="margin-bottom: 20px;">
-            <div style="margin-bottom: 10px;">
-              <strong>Fecha:</strong> ${accion.fecha}
-            </div>
-            <div style="margin-bottom: 15px;">
-              <strong>Descripción:</strong>
-              <p>${accion.descripcion}</p>
-            </div>
-            
-            ${conflicto ? `
-              <div style="margin-bottom: 10px;">
-                <strong>Conflicto:</strong>
-                <a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${conflicto.id});" 
-                   style="color: var(--color-primary); text-decoration: none;">
-                  ${conflicto.titulo}
-                </a>
-              </div>
-            ` : ''}
-            
-            ${entidadesRelacionadas.length > 0 ? `
-              <div>
-                <strong>Entidades relacionadas:</strong>
-                <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
-                  ${entidadesRelacionadas.map(e => `
-                    <span onclick="mostrarFichaEntidad(${e.id})" 
-                          style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px; cursor: pointer;">
-                      ${e.nombre}
-                    </span>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
-          </div>
-          
-          <div style="text-align: right;">
-            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
-    }
-
-    // Función para mostrar ficha de entidad
-    function mostrarFichaEntidad(id) {
-      const entidad = datosActuales.entidades.find((e) => e.id === id);
-      if (!entidad) return;
-
-      const modalId = `modal-ficha-entidad-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
-
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
-
-      // Encontrar conflictos relacionados
-      const conflictosRelacionados = datosActuales.conflictos.filter(
-        c => c.entidades_involucradas && c.entidades_involucradas.includes(entidad.id)
-      );
-
-      modal.innerHTML = `
-        <div style="padding: 20px;">
-          <h2 style="margin-top: 0;">${entidad.nombre}</h2>
-          <div style="margin-bottom: 15px;">
-            <strong>Tipo:</strong> ${capitalizarPrimeraLetra(entidad.tipo)}
-          </div>
-          ${entidad.descripcion ? `
-            <div style="margin-bottom: 15px;">
-              <strong>Descripción:</strong>
-              <p>${entidad.descripcion}</p>
-            </div>
-          ` : ''}
-          
-          <div>
-            <strong>Conflictos relacionados:</strong>
-            ${conflictosRelacionados.length > 0 ? `
-              <ul style="margin-top: 5px;">
-                ${conflictosRelacionados.map(c => `
-                  <li><a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${c.id});" 
-                         style="color: var(--color-primary); text-decoration: none;">
-                    ${c.titulo}
-                  </a></li>
-                `).join('')}
-              </ul>
-            ` : '<p>No hay conflictos relacionados</p>'}
-          </div>
-          
-          <div style="text-align: right; margin-top: 20px;">
-            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
-    }
-
-    // Función para mostrar ficha de persona
-    function mostrarFichaPersona(id) {
-      const persona = datosActuales.personas.find((p) => p.id === id);
-      if (!persona) return;
-
-      const modalId = `modal-ficha-persona-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
-
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
-
-      // Encontrar conflictos relacionados
-      const conflictosRelacionados = datosActuales.conflictos.filter(
-        c => c.personas_involucradas && c.personas_involucradas.includes(persona.id)
-      );
-
-      // Encontrar entidades relacionadas
-      const entidadesRelacionadas = persona.entidades_relacionadas 
-        ? persona.entidades_relacionadas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
-        : [];
-
-      modal.innerHTML = `
-        <div style="padding: 20px;">
-          <h2 style="margin-top: 0;">${persona.nombre}</h2>
-          <div style="margin-bottom: 15px;">
-            <strong>Rol:</strong> ${persona.rol || 'No especificado'}
-          </div>
-          ${persona.contacto ? `
-            <div style="margin-bottom: 15px;">
-              <strong>Contacto:</strong> ${persona.contacto}
-            </div>
-          ` : ''}
-          
-          ${entidadesRelacionadas.length > 0 ? `
-            <div style="margin-bottom: 15px;">
-              <strong>Entidades relacionadas:</strong>
-              <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
-                ${entidadesRelacionadas.map(e => `
-                  <span onclick="mostrarFichaEntidad(${e.id})" 
-                        style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px; cursor: pointer;">
-                    ${e.nombre}
-                  </span>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-          
-          <div>
-            <strong>Conflictos relacionados:</strong>
-            ${conflictosRelacionados.length > 0 ? `
-              <ul style="margin-top: 5px;">
-                ${conflictosRelacionados.map(c => `
-                  <li><a href="#" onclick="event.preventDefault(); mostrarFichaConflicto(${c.id});" 
-                         style="color: var(--color-primary); text-decoration: none;">
-                    ${c.titulo}
-                  </a></li>
-                `).join('')}
-              </ul>
-            ` : '<p>No hay conflictos relacionados</p>'}
-          </div>
-          
-          <div style="text-align: right; margin-top: 20px;">
-            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
-    }
-
-    // Función para mostrar ficha de conflicto
-    function mostrarFichaConflicto(id) {
-      const conflicto = datosActuales.conflictos.find((c) => c.id === id);
-      if (!conflicto) return;
-
-      const modalId = `modal-ficha-conflicto-${Date.now()}`;
-      const modal = document.createElement("div");
-      modal.id = modalId;
-      modal.className = "modal";
-      modal.style.width = "90%";
-      modal.style.maxWidth = "800px";
-
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
-      overlay.onclick = () => cerrarModalEspecifico(modalId);
-
-      // Obtener entidades relacionadas
-      const entidadesRelacionadas = conflicto.entidades_involucradas 
-        ? conflicto.entidades_involucradas.map(id => datosActuales.entidades.find(e => e.id === id)).filter(e => e)
-        : [];
-
-      // Obtener personas relacionadas
-      const personasRelacionadas = conflicto.personas_involucradas 
-        ? conflicto.personas_involucradas.map(id => datosActuales.personas.find(p => p.id === id)).filter(p => p)
-        : [];
-
-      // Obtener acciones relacionadas
-      const accionesRelacionadas = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id);
-
-      modal.innerHTML = `
-        <div style="padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div>
-              <p style="color: #f71616; font-weight: bold; margin: 0 0 5px 0;">Día ${duracion}</p>
-              <h2 style="margin: 0;">${conflicto.titulo}</h2>
-            </div>
-            <span style="background: ${conflicto.estado === 'activo' ? '#FF5252' : '#4CAF50'}; 
-                       color: white; padding: 3px 8px; border-radius: 3px;">
-              ${capitalizarPrimeraLetra(conflicto.estado)}
-            </span>
-          </div>
-          
-          <div style="margin-bottom: 20px;">
-            <div style="margin-bottom: 10px;">
-              <strong>Inicio:</strong> ${conflicto.fecha_inicio}
-            </div>
-            <div style="margin-bottom: 10px;">
-              <strong>Ubicación:</strong> ${conflicto.ubicacion || 'No especificada'}
-            </div>
-            <div style="margin-bottom: 15px;">
-              <strong>Descripción:</strong>
-              <p>${conflicto.descripcion}</p>
-            </div>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <div>
-              <h3 style="margin-top: 0;">Entidades involucradas</h3>
-              ${entidadesRelacionadas.length > 0 ? `
-                <ul>
-                  ${entidadesRelacionadas.map(e => `
-                    <li><a href="#" onclick="event.preventDefault(); mostrarFichaEntidad(${e.id});" 
-                           style="color: var(--color-primary); text-decoration: none;">
-                      ${e.nombre}
-                    </a></li>
-                  `).join('')}
-                </ul>
-              ` : '<p>No hay entidades relacionadas</p>'}
-            </div>
-            
-            <div>
-              <h3 style="margin-top: 0;">Personas involucradas</h3>
-              ${personasRelacionadas.length > 0 ? `
-                <ul>
-                  ${personasRelacionadas.map(p => `
-                    <li><a href="#" onclick="event.preventDefault(); mostrarFichaPersona(${p.id});" 
-                           style="color: var(--color-primary); text-decoration: none;">
-                      ${p.nombre}
-                    </a></li>
-                  `).join('')}
-                </ul>
-              ` : '<p>No hay personas relacionadas</p>'}
-            </div>
-          </div>
-          
-          <div>
-            <h3>Línea de tiempo</h3>
-            ${accionesRelacionadas.length > 0 ? `
-              <div style="display: flex; flex-direction: column; gap: 10px;">
-                ${accionesRelacionadas
-                  .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-                  .map(a => {
-                    const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, a.fecha);
-                    return `
-                      <div class="card" style="margin: 0; cursor: pointer;" 
-                           onclick="mostrarFichaAccion(${a.id})">
-                        <div style="display: flex; justify-content: space-between;">
-                          <strong>Día ${diaAccion} - ${a.fecha}</strong>
-                          <span>${capitalizarPrimeraLetra(a.tipo_accion)}</span>
-                        </div>
-                        <p>${a.descripcion}</p>
-                      </div>
-                    `;
-                  }).join('')}
-              </div>
-            ` : '<p>No hay acciones registradas</p>'}
-          </div>
-          
-          <div style="text-align: right; margin-top: 20px;">
-            <button onclick="cerrarModalEspecifico('${modalId}')">Cerrar</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-      document.body.appendChild(modal);
-    }
-
-    // Función para mostrar conflictos
-    function mostrarConflictos() {
-      console.log("Mostrando conflictos");
-      const contenedor = document.getElementById("lista-conflictos");
-      if (!contenedor) {
-        console.error("No se encontró el contenedor de conflictos");
-        return;
-      }
-      
-      contenedor.innerHTML = "";
-      
-      if (!datosActuales || !datosActuales.conflictos || datosActuales.conflictos.length === 0) {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
-        return;
-      }
-      
-      // Crear un fragmento para mejorar el rendimiento
-      const fragment = document.createDocumentFragment();
-      
-      // Ordenar conflictos por fecha (más recientes primero)
-      const conflictosOrdenados = [...datosActuales.conflictos].sort((a, b) => 
-        new Date(b.fecha_inicio) - new Date(a.fecha_inicio)
-      );
-      
-      conflictosOrdenados.forEach(conflicto => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.cursor = "pointer";
-        
-        // Calcular días transcurridos
-        const fechaInicio = new Date(conflicto.fecha_inicio);
-        const hoy = new Date();
-        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-        
-        // Obtener entidades relacionadas
-        const entidadesNombres = conflicto.entidades_involucradas
-          ? conflicto.entidades_involucradas
-              .map(id => {
-                const entidad = datosActuales.entidades.find(e => e.id === id);
-                return entidad ? entidad.nombre : null;
-              })
-              .filter(nombre => nombre)
-              .join(", ")
-          : "No especificadas";
-        
-        card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <h3 style="margin: 0;">${conflicto.titulo}</h3>
-            <span style="background: ${conflicto.estado === 'activo' ? '#FF5252' : '#4CAF50'}; 
-                         color: white; padding: 3px 8px; border-radius: 3px;">
-              ${capitalizarPrimeraLetra(conflicto.estado)}
-            </span>
-          </div>
-          <div style="margin-bottom: 8px;">
-            <strong>Inicio:</strong> ${conflicto.fecha_inicio} (${diasTranscurridos} días)
-          </div>
-          <div style="margin-bottom: 8px;">
-            <strong>Ubicación:</strong> ${conflicto.ubicacion || 'No especificada'}
-          </div>
-          <div>
-            <strong>Partes:</strong> ${entidadesNombres}
-          </div>
-        `;
-        
-        card.onclick = () => mostrarFichaConflicto(conflicto.id);
         fragment.appendChild(card);
       });
       
@@ -1619,39 +1548,55 @@
     function mostrarGestionAcciones() {
       console.log("Mostrando gestión de acciones");
       const listaAcciones = document.getElementById('lista-acciones');
-      if (!listaAcciones) return;
+      if (!listaAcciones) {
+        console.error("No se encontró el contenedor de lista de acciones");
+        return;
+      }
       
+      // Limpiar la lista
       listaAcciones.innerHTML = '';
       
-      if (!datosActuales.acciones || datosActuales.acciones.length === 0) {
+      // Verificar si hay acciones
+      if (!datosActuales || !datosActuales.acciones || datosActuales.acciones.length === 0) {
         listaAcciones.innerHTML = "<p>No hay acciones registradas.</p>";
         return;
       }
       
+      console.log(`Mostrando ${datosActuales.acciones.length} acciones`);
+      
+      // Ordenar acciones por fecha (más recientes primero)
       const accionesOrdenadas = [...datosActuales.acciones].sort((a, b) => 
         new Date(b.fecha) - new Date(a.fecha)
       );
       
+      // Crear tarjetas para cada acción
       accionesOrdenadas.forEach(accion => {
-        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
-        if (!conflicto) return;
+        const conflicto = accion.id_conflicto 
+          ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
+          : null;
         
-        const diaAccion = calcularDiaAccion(conflicto.fecha_inicio, accion.fecha);
+        if (!conflicto) return; // Saltar si no hay conflicto asociado
+        
+        const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
         
         const card = document.createElement("div");
         card.className = "card";
         card.style.margin = "10px 0";
         card.style.padding = "15px";
+        card.style.borderRadius = "8px";
+        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+        card.style.backgroundColor = "#fff";
+        card.style.cursor = "pointer";
         
         card.innerHTML = `
           <div style="display: flex; flex-direction: column;">
             <div style="margin-bottom: 10px;">
-              <span style="color: #f71616; font-weight: bold;">Día ${diaAccion}</span>
+              <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
             <div style="margin-bottom: 10px;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
               <span style="margin: 0 5px;">|</span>
-              <span>${accion.descripcion}</span>
+              <span>${accion.descripcion || 'Sin descripción'}</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em;">
               <span style="color: #666;">Conflicto: </span>
@@ -1665,11 +1610,26 @@
       });
     }
 
-    // Función para ocultar todas las vistas
-    function ocultarTodasLasVistas() {
-      document.querySelectorAll('.vista-principal').forEach(vista => {
-        vista.classList.add('hidden');
-      });
+    // Función para calcular el tiempo transcurrido en formato legible
+    function calcularTiempoTranscurrido(fecha) {
+      const fechaAccion = new Date(fecha);
+      const ahora = new Date();
+      
+      // Diferencia en milisegundos
+      const diferencia = ahora - fechaAccion;
+      
+      // Convertir a minutos, horas y días
+      const minutos = Math.floor(diferencia / (1000 * 60));
+      const horas = Math.floor(diferencia / (1000 * 60 * 60));
+      const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+      
+      if (minutos < 60) {
+        return `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
+      } else if (horas < 24) {
+        return `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+      } else {
+        return `${dias} ${dias === 1 ? 'día' : 'días'}`;
+      }
     }
 
     async function cargarListaPartes() {
@@ -1704,7 +1664,7 @@
         div.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <strong>${persona.nombre}</strong> (${persona.rol || 'Sin rol'})
+              <strong>${persona.nombre}</strong> (${persona.rol})
             </div>
             <div>
               <button onclick="editarPersona(${persona.id})">Editar</button>
@@ -1751,16 +1711,11 @@
 
     // Asegurarse de que los datos se cargan al inicio
     window.onload = async function() {
-      try {
-        await cargarDatos();
-        // Mostrar la sección de acciones por defecto
-        mostrarSeccion('acciones');
-      } catch (error) {
-        console.error("Error al cargar datos iniciales:", error);
-      }
+      await cargarDatos()
+      mostrarSeccion('acciones')
     };
 
-    // Función para capitalizar la primera letra
+    // Agregar esta función para capitalizar la primera letra
     function capitalizarPrimeraLetra(texto) {
       if (!texto) return '';
       return texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -1854,13 +1809,804 @@
         // Guardar el ID del conflicto que estamos editando
         conflictoEditando = idConflicto;
       } else {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
+        // Si es un nuevo conflicto
+        conflictoEditando = null;
+        // Establecer la fecha de hoy como fecha de inicio por defecto
+        document.getElementById("fecha_inicio").value = new Date().toISOString().split('T')[0];
       }
     }
 
-    // Mantener el resto de las funciones existentes...
-    // (mostrarConflictos, calcularDuracion, capitalizarPrimeraLetra, etc.)
+    // Función para agregar acción a un conflicto
+    function agregarAccionAConflicto() {
+      if (!datosActuales || !datosActuales.acciones || datosActuales.acciones.length === 0) {
+        alert("No hay acciones disponibles para agregar.");
+        return;
+      }
+      
+      // Si es un nuevo conflicto, primero debe guardarse
+      if (!conflictoEditando) {
+        alert("Primero debe guardar el conflicto antes de agregar acciones.");
+        return;
+      }
+      
+      // Crear modal para seleccionar acción
+      const modalId = `modal-acciones-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+      
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+      
+      // Obtener IDs de acciones ya agregadas
+      const accionesAgregadas = Array.from(
+        document.querySelectorAll("#acciones-lista-conflicto li")
+      ).map(li => parseInt(li.getAttribute("data-id")));
+      
+      // Filtrar acciones disponibles (que no estén ya agregadas y que no pertenezcan a otro conflicto)
+      const accionesDisponibles = datosActuales.acciones.filter(
+        accion => !accionesAgregadas.includes(accion.id) && 
+                  (accion.id_conflicto === conflictoEditando || !accion.id_conflicto)
+      );
+      
+      if (accionesDisponibles.length === 0) {
+        alert("No hay acciones disponibles para agregar a este conflicto.");
+        return;
+      }
+      
+      let contenido = `
+        <h3>Seleccionar Acción</h3>
+        <div style="max-height: 300px; overflow-y: auto; margin: 15px 0;">
+          <ul style="list-style: none; padding: 0;">
+            ${accionesDisponibles.map(accion => `
+              <li class="accion-item">
+                <input type="checkbox" id="accion-${accion.id}" data-id="${accion.id}">
+                <label for="accion-${accion.id}">${accion.fecha} - ${capitalizarPrimeraLetra(accion.tipo_accion)}: ${accion.descripcion}</label>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="confirmarAgregarAcciones('${modalId}')">Agregar</button>
+        </div>
+      `;
+      
+      modal.innerHTML = contenido;
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
 
+    // Función para confirmar la adición de acciones
+    function confirmarAgregarAcciones(modalId) {
+      const accionesSeleccionadas = Array.from(
+        document.querySelectorAll(`#${modalId} input[type="checkbox"]:checked`)
+      ).map(checkbox => {
+        const id = parseInt(checkbox.getAttribute("data-id"));
+        const accion = datosActuales.acciones.find(a => a.id === id);
+        return accion;
+      });
+      
+      if (accionesSeleccionadas.length === 0) {
+        alert("Por favor seleccione al menos una acción.");
+        return;
+      }
+      
+      const listaAcciones = document.getElementById("acciones-lista-conflicto");
+      
+      accionesSeleccionadas.forEach(accion => {
+        // Actualizar la acción para asociarla con este conflicto
+        const indice = datosActuales.acciones.findIndex(a => a.id === accion.id);
+        if (indice !== -1) {
+          datosActuales.acciones[indice].id_conflicto = conflictoEditando;
+        }
+        
+        const li = document.createElement("li");
+        li.setAttribute("data-id", accion.id);
+        li.innerHTML = `
+          ${accion.fecha} - ${capitalizarPrimeraLetra(accion.tipo_accion)}: ${accion.descripcion}
+          <button onclick="this.parentNode.remove()" style="background: none; border: none; color: var(--color-primary); cursor: pointer; margin-left: 10px;">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        listaAcciones.appendChild(li);
+      });
+      
+      cerrarModalEspecifico(modalId);
+    }
+
+    // Función para agregar entidad a un conflicto
+    function agregarEntidadAConflicto() {
+      if (!datosActuales || !datosActuales.entidades || datosActuales.entidades.length === 0) {
+        alert("No hay entidades disponibles para agregar.");
+        return;
+      }
+      
+      // Crear modal para seleccionar entidad
+      const modalId = `modal-entidades-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+      
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+      
+      // Obtener IDs de entidades ya agregadas
+      const entidadesAgregadas = Array.from(
+        document.querySelectorAll("#entidades-lista-conflicto li")
+      ).map(li => parseInt(li.getAttribute("data-id")));
+      
+      // Filtrar entidades disponibles
+      const entidadesDisponibles = datosActuales.entidades.filter(
+        entidad => !entidadesAgregadas.includes(entidad.id)
+      );
+      
+      if (entidadesDisponibles.length === 0) {
+        alert("Todas las entidades ya han sido agregadas a este conflicto.");
+        return;
+      }
+      
+      let contenido = `
+        <h3>Seleccionar Entidad</h3>
+        <div style="max-height: 300px; overflow-y: auto; margin: 15px 0;">
+          <ul style="list-style: none; padding: 0;">
+            ${entidadesDisponibles.map(entidad => `
+              <li class="entidad-item">
+                <input type="checkbox" id="entidad-${entidad.id}" data-id="${entidad.id}">
+                <label for="entidad-${entidad.id}">${entidad.nombre}</label>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="confirmarAgregarEntidades('${modalId}')">Agregar</button>
+        </div>
+      `;
+      
+      modal.innerHTML = contenido;
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para confirmar la adición de entidades
+    function confirmarAgregarEntidades(modalId) {
+      const entidadesSeleccionadas = Array.from(
+        document.querySelectorAll(`#${modalId} input[type="checkbox"]:checked`)
+      ).map(checkbox => {
+        const id = parseInt(checkbox.getAttribute("data-id"));
+        const entidad = datosActuales.entidades.find(e => e.id === id);
+        return { id, nombre: entidad.nombre };
+      });
+      
+      if (entidadesSeleccionadas.length === 0) {
+        alert("Por favor seleccione al menos una entidad.");
+        return;
+      }
+      
+      const listaEntidades = document.getElementById("entidades-lista-conflicto");
+      
+      entidadesSeleccionadas.forEach(entidad => {
+        const li = document.createElement("li");
+        li.setAttribute("data-id", entidad.id);
+        li.innerHTML = `
+          ${entidad.nombre}
+          <button onclick="this.parentNode.remove()" style="background: none; border: none; color: var(--color-primary); cursor: pointer; margin-left: 10px;">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        listaEntidades.appendChild(li);
+      });
+      
+      cerrarModalEspecifico(modalId);
+    }
+
+    // Función para agregar persona a un conflicto
+    function agregarPersonaAConflicto() {
+      if (!datosActuales || !datosActuales.personas || datosActuales.personas.length === 0) {
+        alert("No hay personas disponibles para agregar.");
+        return;
+      }
+      
+      // Crear modal para seleccionar persona
+      const modalId = `modal-personas-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+      
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+      
+      // Obtener IDs de personas ya agregadas
+      const personasAgregadas = Array.from(
+        document.querySelectorAll("#personas-lista-conflicto li")
+      ).map(li => parseInt(li.getAttribute("data-id")));
+      
+      // Filtrar personas disponibles
+      const personasDisponibles = datosActuales.personas.filter(
+        persona => !personasAgregadas.includes(persona.id)
+      );
+      
+      if (personasDisponibles.length === 0) {
+        alert("Todas las personas ya han sido agregadas a este conflicto.");
+        return;
+      }
+      
+      let contenido = `
+        <h3>Seleccionar Persona</h3>
+        <div style="max-height: 300px; overflow-y: auto; margin: 15px 0;">
+          <ul style="list-style: none; padding: 0;">
+            ${personasDisponibles.map(persona => `
+              <li class="persona-item">
+                <input type="checkbox" id="persona-${persona.id}" data-id="${persona.id}">
+                <label for="persona-${persona.id}">${persona.nombre}</label>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="confirmarAgregarPersonas('${modalId}')">Agregar</button>
+        </div>
+      `;
+      
+      modal.innerHTML = contenido;
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para confirmar la adición de personas
+    function confirmarAgregarPersonas(modalId) {
+      const personasSeleccionadas = Array.from(
+        document.querySelectorAll(`#${modalId} input[type="checkbox"]:checked`)
+      ).map(checkbox => {
+        const id = parseInt(checkbox.getAttribute("data-id"));
+        const persona = datosActuales.personas.find(p => p.id === id);
+        return { id, nombre: persona.nombre };
+      });
+      
+      if (personasSeleccionadas.length === 0) {
+        alert("Por favor seleccione al menos una persona.");
+        return;
+      }
+      
+      const listaPersonas = document.getElementById("personas-lista-conflicto");
+      
+      personasSeleccionadas.forEach(persona => {
+        const li = document.createElement("li");
+        li.setAttribute("data-id", persona.id);
+        li.innerHTML = `
+          ${persona.nombre}
+          <button onclick="this.parentNode.remove()" style="background: none; border: none; color: var(--color-primary); cursor: pointer; margin-left: 10px;">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        listaPersonas.appendChild(li);
+      });
+      
+      cerrarModalEspecifico(modalId);
+    }
+
+    // Función para eliminar una acción
+    function eliminarAccion(id) {
+      if (!confirm("¿Está seguro de que desea eliminar esta acción?")) {
+        return;
+      }
+
+      try {
+        // Encontrar el índice de la acción en el array
+        const indice = datosActuales.acciones.findIndex(a => a.id === id);
+        if (indice === -1) {
+          throw new Error("Acción no encontrada");
+        }
+
+        // Eliminar la acción del array
+        datosActuales.acciones.splice(indice, 1);
+
+        // Mostrar indicador de guardado
+        const saveIndicator = document.createElement("div");
+        saveIndicator.style.position = "fixed";
+        saveIndicator.style.top = "20px";
+        saveIndicator.style.right = "20px";
+        saveIndicator.style.padding = "10px 20px";
+        saveIndicator.style.backgroundColor = "var(--color-primary)";
+        saveIndicator.style.color = "white";
+        saveIndicator.style.borderRadius = "4px";
+        saveIndicator.style.zIndex = "9999";
+        saveIndicator.textContent = "Eliminando...";
+        document.body.appendChild(saveIndicator);
+
+        // Actualizar los datos en el servidor
+        actualizarDatos(datosActuales).then(() => {
+          // Actualizar mensaje de guardado exitoso
+          saveIndicator.textContent = "¡Eliminado con éxito!";
+          saveIndicator.style.backgroundColor = "#4CAF50";
+
+          // Eliminar el indicador después de 2 segundos
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+
+          // Recargar la lista de acciones
+          mostrarGestionAcciones();
+        });
+
+      } catch (error) {
+        console.error("Error al eliminar acción:", error);
+        alert("Error al eliminar la acción. Intente nuevamente.");
+      }
+    }
+
+    // Función para editar una acción
+    function editarAccion(id) {
+      const accion = datosActuales.acciones.find(a => a.id === id);
+      if (!accion) {
+        alert("Acción no encontrada");
+        return;
+      }
+
+      // Crear modal para editar acción
+      const modalId = `modal-editar-accion-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      // Obtener lista de conflictos para el select
+      const opcionesConflictos = datosActuales.conflictos
+        .map(c => `<option value="${c.id}" ${c.id === accion.id_conflicto ? 'selected' : ''}>${c.titulo}</option>`)
+        .join('');
+
+      // Obtener lista de entidades para los checkboxes
+      const entidadesSeleccionadas = accion.entidades_involucradas || [];
+      const opcionesEntidades = datosActuales.entidades
+        .map(e => `
+          <div class="entidad-item">
+            <input type="checkbox" id="entidad-${e.id}" value="${e.id}" 
+              ${entidadesSeleccionadas.includes(e.id) ? 'checked' : ''}>
+            <label for="entidad-${e.id}">${e.nombre}</label>
+          </div>
+        `)
+        .join('');
+
+      modal.innerHTML = `
+        <h3>Editar Acción</h3>
+        <div class="form-group">
+          <label for="tipo_accion">Tipo de Acción</label>
+          <select id="tipo_accion" required>
+            <option value="reunion" ${accion.tipo_accion === 'reunion' ? 'selected' : ''}>Reunión</option>
+            <option value="comunicado" ${accion.tipo_accion === 'comunicado' ? 'selected' : ''}>Comunicado</option>
+            <option value="medida" ${accion.tipo_accion === 'medida' ? 'selected' : ''}>Medida de Fuerza</option>
+            <option value="otro" ${accion.tipo_accion === 'otro' ? 'selected' : ''}>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" value="${accion.fecha}" required>
+        </div>
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" rows="3" required>${accion.descripcion}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="id_conflicto">Conflicto Relacionado</label>
+          <select id="id_conflicto" required>
+            <option value="">Seleccione un conflicto</option>
+            ${opcionesConflictos}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Entidades Relacionadas</label>
+          <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-top: 5px;">
+            ${opcionesEntidades}
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="guardarEdicionAccion(${id}, '${modalId}')">Guardar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para guardar la edición de una acción
+    async function guardarEdicionAccion(id, modalId) {
+      try {
+        const tipo_accion = document.getElementById("tipo_accion").value;
+        const fecha = document.getElementById("fecha").value;
+        const descripcion = document.getElementById("descripcion").value;
+        const id_conflicto = parseInt(document.getElementById("id_conflicto").value);
+        const entidades_involucradas = Array.from(
+          document.querySelectorAll('input[type="checkbox"]:checked')
+        ).map(cb => parseInt(cb.value));
+
+        if (!tipo_accion || !fecha || !descripcion || !id_conflicto) {
+          alert("Por favor complete todos los campos requeridos");
+          return;
+        }
+
+        // Encontrar y actualizar la acción
+        const indice = datosActuales.acciones.findIndex(a => a.id === id);
+        if (indice !== -1) {
+          datosActuales.acciones[indice] = {
+            ...datosActuales.acciones[indice],
+            tipo_accion,
+            fecha,
+            descripcion,
+            id_conflicto,
+            entidades_involucradas
+          };
+
+          // Mostrar indicador de guardado
+          const saveIndicator = document.createElement("div");
+          saveIndicator.style.position = "fixed";
+          saveIndicator.style.top = "20px";
+          saveIndicator.style.right = "20px";
+          saveIndicator.style.padding = "10px 20px";
+          saveIndicator.style.backgroundColor = "var(--color-primary)";
+          saveIndicator.style.color = "white";
+          saveIndicator.style.borderRadius = "4px";
+          saveIndicator.style.zIndex = "9999";
+          saveIndicator.textContent = "Guardando...";
+          document.body.appendChild(saveIndicator);
+
+          await actualizarDatos(datosActuales);
+
+          // Actualizar mensaje de guardado exitoso
+          saveIndicator.textContent = "¡Guardado con éxito!";
+          saveIndicator.style.backgroundColor = "#4CAF50";
+
+          // Eliminar el indicador después de 2 segundos
+          setTimeout(() => {
+            saveIndicator.remove();
+          }, 2000);
+
+          cerrarModalEspecifico(modalId);
+          mostrarGestionAcciones();
+        }
+      } catch (error) {
+        console.error("Error al guardar la acción:", error);
+        alert("Error al guardar los cambios. Intente nuevamente.");
+      }
+    }
+
+    // Función para editar una entidad
+    function editarEntidad(id) {
+      const entidad = datosActuales.entidades.find(e => e.id === id);
+      if (!entidad) {
+        alert("Entidad no encontrada");
+        return;
+      }
+
+      const modalId = `modal-editar-entidad-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      modal.innerHTML = `
+        <h3>Editar Entidad</h3>
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" value="${entidad.nombre}" required>
+        </div>
+        <div class="form-group">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" required>
+            <option value="sindicato" ${entidad.tipo === 'sindicato' ? 'selected' : ''}>Sindicato</option>
+            <option value="empresa" ${entidad.tipo === 'empresa' ? 'selected' : ''}>Empresa</option>
+            <option value="gobierno" ${entidad.tipo === 'gobierno' ? 'selected' : ''}>Gobierno</option>
+            <option value="otro" ${entidad.tipo === 'otro' ? 'selected' : ''}>Otro</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="guardarEdicionEntidad(${id}, '${modalId}')">Guardar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar el formulario de nueva parte (entidad)
+    function mostrarFormularioNuevaParte() {
+      const modalId = `modal-nueva-parte-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      modal.innerHTML = `
+        <h3>Nueva Parte</h3>
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" required>
+        </div>
+        <div class="form-group">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" required>
+            <option value="sindicato">Sindicato</option>
+            <option value="empresa">Empresa</option>
+            <option value="gobierno">Gobierno</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="guardarNuevaEntidad('${modalId}')">Guardar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar el formulario de nueva persona
+    function mostrarFormularioNuevaPersona() {
+      const modalId = `modal-nueva-persona-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      modal.innerHTML = `
+        <h3>Nueva Persona</h3>
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" required>
+        </div>
+        <div class="form-group">
+          <label for="rol">Rol</label>
+          <input type="text" id="rol" required>
+        </div>
+        <div class="form-group">
+          <label for="entidad">Entidad</label>
+          <select id="entidad" required>
+            <option value="">Seleccione una entidad</option>
+            ${datosActuales.entidades.map(e => 
+              `<option value="${e.id}">${e.nombre}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="guardarNuevaPersona('${modalId}')">Guardar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para editar una persona
+    function editarPersona(id) {
+      const persona = datosActuales.personas.find(p => p.id === id);
+      if (!persona) {
+        alert("Persona no encontrada");
+        return;
+      }
+
+      const modalId = `modal-editar-persona-${Date.now()}`;
+      const modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal";
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      overlay.onclick = () => cerrarModalEspecifico(modalId);
+
+      modal.innerHTML = `
+        <h3>Editar Persona</h3>
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" value="${persona.nombre}" required>
+        </div>
+        <div class="form-group">
+          <label for="rol">Rol</label>
+          <input type="text" id="rol" value="${persona.rol}" required>
+        </div>
+        <div class="form-group">
+          <label for="entidad">Entidad</label>
+          <select id="entidad" required>
+            <option value="">Seleccione una entidad</option>
+            ${datosActuales.entidades.map(e => 
+              `<option value="${e.id}" ${e.id === persona.id_entidad ? 'selected' : ''}>${e.nombre}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <button onclick="cerrarModalEspecifico('${modalId}')">Cancelar</button>
+          <button onclick="guardarEdicionPersona(${id}, '${modalId}')">Guardar</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+    }
+
+    // Función para mostrar las acciones en la sección de gestión de acciones
+    function mostrarGestionAcciones() {
+      console.log("Mostrando gestión de acciones");
+      const listaAcciones = document.getElementById('lista-acciones');
+      if (!listaAcciones) {
+        console.error("No se encontró el contenedor de lista de acciones");
+        return;
+      }
+      
+      // Limpiar la lista
+      listaAcciones.innerHTML = '';
+      
+      // Verificar si hay acciones
+      if (!datosActuales || !datosActuales.acciones || datosActuales.acciones.length === 0) {
+        listaAcciones.innerHTML = "<p>No hay acciones registradas.</p>";
+        return;
+      }
+      
+      console.log(`Mostrando ${datosActuales.acciones.length} acciones`);
+      
+      // Ordenar acciones por fecha (más recientes primero)
+      const accionesOrdenadas = [...datosActuales.acciones].sort((a, b) => 
+        new Date(b.fecha) - new Date(a.fecha)
+      );
+      
+      // Crear tarjetas para cada acción
+      accionesOrdenadas.forEach(accion => {
+        const conflicto = accion.id_conflicto 
+          ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
+          : null;
+        
+        if (!conflicto) return; // Saltar si no hay conflicto asociado
+        
+        const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
+        
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.margin = "10px 0";
+        card.style.padding = "15px";
+        card.style.borderRadius = "8px";
+        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+        card.style.backgroundColor = "#fff";
+        card.style.cursor = "pointer";
+        
+        card.innerHTML = `
+          <div style="display: flex; flex-direction: column;">
+            <div style="margin-bottom: 10px;">
+              <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
+              <span style="margin: 0 5px;">|</span>
+              <span>${accion.descripcion || 'Sin descripción'}</span>
+            </div>
+            <div style="margin-top: 5px; font-size: 0.9em;">
+              <span style="color: #666;">Conflicto: </span>
+              <span>${conflicto.titulo}</span>
+            </div>
+          </div>
+        `;
+        
+        card.onclick = () => mostrarFichaAccion(accion.id);
+        listaAcciones.appendChild(card);
+      });
+    }
+
+    // Función para calcular el tiempo transcurrido en formato legible
+    function calcularTiempoTranscurrido(fecha) {
+      const fechaAccion = new Date(fecha);
+      const ahora = new Date();
+      
+      // Diferencia en milisegundos
+      const diferencia = ahora - fechaAccion;
+      
+      // Convertir a minutos, horas y días
+      const minutos = Math.floor(diferencia / (1000 * 60));
+      const horas = Math.floor(diferencia / (1000 * 60 * 60));
+      const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+      
+      if (minutos < 60) {
+        return `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
+      } else if (horas < 24) {
+        return `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+      } else {
+        return `${dias} ${dias === 1 ? 'día' : 'días'}`;
+      }
+    }
+
+    // Función para mostrar la lista de acciones
+    function mostrarListaAcciones() {
+      // Ocultar todas las vistas principales
+      document.querySelectorAll('.vista-principal').forEach(vista => {
+        vista.style.display = 'none';
+      });
+
+      // Mostrar la lista de acciones
+      const listaAcciones = document.getElementById('lista-acciones');
+      if (listaAcciones) {
+        listaAcciones.style.display = 'block';
+      }
+
+      // Lógica para cargar y mostrar las acciones
+      // ... (código para cargar acciones)
+    }
+
+    function cerrarFichaAccion() {
+        const modal = document.getElementById('ficha-accion-modal');
+        if (modal) {
+            modal.style.display = "none";
+        } else {
+            console.error("No se encontró el modal para cerrar.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asegúrate de que cerrarFichaAccion esté definida aquí dentro si es necesario
+        function cerrarFichaAccion() {
+            const modal = document.getElementById('ficha-accion-modal');
+            modal.style.display = "none";
+        }
+
+        // Otro código que dependa del DOM
+    });
+
+    // Eliminar el botón "volver" de la ficha de conflictos
+    document.addEventListener('DOMContentLoaded', function() {
+        // Buscar el botón volver dentro de la ficha de conflictos
+        const botonVolver = document.querySelector('#modal-conflicto .btn-volver');
+        if (botonVolver) {
+            botonVolver.remove();
+            console.log("Botón volver eliminado de la ficha de conflictos");
+        }
+    });
+
+    // Asegurar que el botón conflictos muestre la lista de conflictos
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnConflictos = document.getElementById('nav-conflictos');
+        if (btnConflictos) {
+            // Preservar la función original si existe
+            const originalOnClick = btnConflictos.onclick;
+            
+            btnConflictos.onclick = function(e) {
+                // Mostrar la lista de conflictos
+                const listaConflictos = document.getElementById('lista-conflictos');
+                if (listaConflictos) {
+                    listaConflictos.style.display = 'block';
+                    console.log("Lista de conflictos mostrada");
+                }
+                
+                // Ocultar la ficha de conflicto si está abierta
+                const modalConflicto = document.getElementById('modal-conflicto');
+                if (modalConflicto) {
+                    modalConflicto.style.display = 'none';
+                    console.log("Ficha de conflicto ocultada");
+                }
+                
+                // Llamar a la función original si existe
+                if (typeof originalOnClick === 'function') {
+                    return originalOnClick.call(this, e);
+                }
+            };
+            
+            console.log("Event listener configurado para el botón conflictos");
+        }
+    });
   </script>
 </body>
 </html>

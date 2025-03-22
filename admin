@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-title {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        
+        .admin-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .admin-sidebar {
+            width: 250px;
+            background-color: #f0f0f0;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .admin-main {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .admin-section {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        .admin-section-title {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .admin-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .admin-menu a {
+            display: block;
+            padding: 10px;
+            background-color: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .admin-menu a:hover, .admin-menu a.active {
+            background-color: #333;
+            color: white;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-table th {
+            background-color: #f0f0f0;
+        }
+        
+        .admin-form {
+            max-width: 600px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-default {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        
+        .badge-active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .badge-inactive {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        
+        .loading::after {
+            content: "";
+            width: 40px;
+            height: 40px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            z-index: 10000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="admin-header">
+            <h1 class="admin-title">Panel de Administración</h1>
+            <div>
+                <button class="btn btn-primary" onclick="guardarTodosCambios()">Guardar Todos los Cambios</button>
+                <button class="btn btn-default" onclick="window.location.href='index.html'">Ver Sitio</button>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="admin-sidebar">
+                <ul class="admin-menu">
+                    <li><a onclick="showSection('conflictos')" class="active">Conflictos</a></li>
+                    <li><a onclick="showSection('entidades')">Entidades</a></li>
+                    <li><a onclick="showSection('personas')">Personas</a></li>
+                    <li><a onclick="showSection('acciones')">Acciones</a></li>
+                    <li><a onclick="showSection('config')">Configuración</a></li>
+                    <li><a onclick="showSection('importar-json')">Importar JSON</a></li>
+                </ul>
+            </div>
+            <div class="admin-main">
+                <!-- Sección de conflictos -->
+                <div id="section-conflictos" class="admin-section">
+                    <h2 class="admin-section-title">Gestión de Conflictos</h2>
+                    <button class="btn btn-primary" onclick="showAddForm('conflicto')">Agregar Nuevo Conflicto</button>
+                    <div id="conflictos-table-container" class="loading">
+                    </div>
+                </div>
+                
+                <!-- Sección de entidades -->
+                <div id="section-entidades" class="admin-section">
+                    <h2 class="admin-section-title">Gestión de Entidades</h2>
+                    <button class="btn btn-primary" onclick="showAddForm('entidad')">Agregar Nueva Entidad</button>
+                    <div id="entidades-table-container" class="loading">
+                    </div>
+                </div>
+                
+                <!-- Sección de personas -->
+                <div id="section-personas" class="admin-section">
+                    <h2 class="admin-section-title">Gestión de Personas</h2>
+                    <button class="btn btn-primary" onclick="showAddForm('persona')">Agregar Nueva Persona</button>
+                    <div id="personas-table-container" class="loading">
+                    </div>
+                </div>
+                
+                <!-- Sección de acciones -->
+                <div id="section-acciones" class="admin-section">
+                    <h2 class="admin-section-title">Gestión de Acciones</h2>
+                    <button class="btn btn-primary" onclick="showAddForm('accion')">Agregar Nueva Acción</button>
+                    <div id="acciones-table-container" class="loading">
+                    </div>
+                </div>
+                
+                <!-- Sección de configuración -->
+                <div id="section-config" class="admin-section">
+                    <h2 class="admin-section-title">Configuración del Sitio</h2>
+                    <div class="admin-form">
+                        <div class="form-group">
+                            <label for="site-title">Título del Sitio:</label>
+                            <input type="text" id="site-title" placeholder="Título del sitio">
+                        </div>
+                        <div class="form-group">
+                            <label for="site-description">Descripción del Sitio:</label>
+                            <textarea id="site-description" placeholder="Descripción breve del sitio"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveConfig()">Guardar Configuración</button>
+                    </div>
+                </div>
+                
+                <!-- Sección de importar JSON -->
+                <div id="section-importar-json" class="admin-section">
+                    <h2 class="admin-section-title">Importar JSON</h2>
+                    <div class="admin-form">
+                        <div class="form-group">
+                            <label for="nuevosDatos">Nuevos datos en formato JSON:</label>
+                            <textarea id="nuevosDatos" rows="10" style="width: 100%; min-height: 300px;" placeholder="Escribe los nuevos datos en formato JSON..."></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="actualizarDatos()">Actualizar JSON</button>
+                        </div>
+                        
+                        <div id="mensaje-json" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constantes para la API
+        const BASE_URL = "https://api.jsonbin.io/v3/b/67b7af37e41b4d34e49614cb";
+        const API_KEY = "$2a$10$g6sH3FZZb2lLbX6sdlo7Eeq4pSp3prxRk//ZurGqxwpFs2jECn.US";
+        const ACCESS_KEY = "$2a$10$DPXPqteMvbeGS75DZo25vOUxM.8HjLW7fo/dqYpjk0S88JtC/k/BG";
+        
+        // Variables globales
+        let datosActuales = null;
+        let cambiosPendientes = {};
+        let metadataActual = null;
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("DOM cargado, inicializando panel de administración...");
+            
+            // Inicializar cambios pendientes
+            cambiosPendientes = {};
+            
+            // Cargar datos
+            await cargarDatos();
+            
+            // Mostrar tablas iniciales
+            mostrarTablaConflictos();
+            mostrarTablaEntidades();
+            mostrarTablaPersonas();
+            mostrarTablaAcciones();
+            
+            // Mostrar la sección de conflictos por defecto
+            showSection('conflictos');
+            
+            // Agregar menú de importar JSON
+            agregarMenuImportarJSON();
+        });
+        
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, esError = false) {
+            // Eliminar notificaciones anteriores
+            const notificacionesAnteriores = document.querySelectorAll('.admin-notificacion');
+            notificacionesAnteriores.forEach(notif => notif.remove());
+            
+            // Crear nueva notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = 'admin-notificacion';
+            notificacion.style.position = 'fixed';
+            notificacion.style.bottom = '20px';
+            notificacion.style.left = '20px';
+            notificacion.style.backgroundColor = esError ? '#f44336' : '#4CAF50';
+            notificacion.style.color = 'white';
+            notificacion.style.padding = '10px 20px';
+            notificacion.style.borderRadius = '4px';
+            notificacion.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            notificacion.style.zIndex = '10001';
+            notificacion.style.maxWidth = '80%';
+            
+            notificacion.textContent = mensaje;
+            
+            document.body.appendChild(notificacion);
+            
+            // Eliminar después de 5 segundos
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.remove();
+                }
+            }, 5000);
+            
+            // También mostrar en la consola
+            if (esError) {
+                console.error(mensaje);
+            } else {
+                console.log(mensaje);
+            }
+        }
+        
+        // Función para cargar datos desde la API
+        async function cargarDatos() {
+            try {
+                console.log("Cargando datos desde la API...");
+                
+                // Configurar la solicitud
+                const response = await fetch(`${BASE_URL}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': API_KEY,
+                        'X-Access-Key': ACCESS_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Datos recibidos:", data);
+                
+                // Guardar los datos y metadata
+                datosActuales = data.record;
+                metadataActual = data.metadata;
+                
+                // Inicializar cambios pendientes
+                cambiosPendientes = {};
+                
+                // Mostrar los datos en las tablas
+                mostrarTablaConflictos();
+                mostrarTablaEntidades();
+                mostrarTablaPersonas();
+                mostrarTablaAcciones();
+                
+                mostrarNotificacion("Datos cargados correctamente");
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                mostrarNotificacion("Error al cargar datos: " + error.message, true);
+            }
+        }
+        
+        // Función para guardar datos en la API
+        async function guardarDatosEnAPI() {
+            try {
+                console.log("Guardando datos en la API...");
+                
+                // Configurar la solicitud
+                const response = await fetch(`${BASE_URL}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY,
+                        'X-Access-Key': ACCESS_KEY
+                    },
+                    body: JSON.stringify(datosActuales)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Respuesta de guardado:", data);
+                
+                // Actualizar metadata
+                metadataActual = data.metadata;
+                
+                return true;
+            } catch (error) {
+                console.error("Error al guardar datos:", error);
+                mostrarNotificacion("Error al guardar datos: " + error.message, true);
+                return false;
+            }
+        }
+        
+        // Función para mostrar una sección
+        function showSection(seccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.admin-section').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(`section-${seccion}`).style.display = 'block';
+            
+            // Actualizar menú
+            document.querySelectorAll('.admin-menu a').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`.admin-menu a[onclick*="${seccion}"]`).classList.add('active');
+        }
+        
+        // Función para mostrar la tabla de conflictos
+        function mostrarTablaConflictos() {
+            const container = document.getElementById('conflictos-table-container');
+            container.classList.remove('loading');
+            
+            if (!datosActuales || !datosActuales.conflictos) {
+                container.innerHTML = '<p>No hay datos disponibles.</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Fecha de Inicio</th>
+                            <th>Ubicación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            datosActuales.conflictos.forEach(conflicto => {
+                html += `
+                    <tr>
+                        <td>${conflicto.id}</td>
+                        <td>${conflicto.titulo}</td>
+                        <td>${conflicto.fecha_inicio}</td>
+                        <td>${conflicto.ubicacion || 'No especificada'}</td>
+                        <td>
+                            ${conflicto.estado}
+                            <span class="admin-badge ${conflicto.estado === 'activo' ? 'badge-active' : 'badge-inactive'}">
+                                ${conflicto.estado === 'activo' ? 'Activo' : 'Resuelto'}
+                            </span>
+                        </td>
+                        <td class="admin-actions">
+                            <button class="btn btn-default" onclick="verConflicto(${conflicto.id})">Ver</button>
+                            <button class="btn btn-primary" onclick="editarConflicto(${conflicto.id})">Editar</button>
+                            <button class="btn btn-secondary" onclick="eliminarConflicto(${conflicto.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Función para mostrar la tabla de entidades
+        function mostrarTablaEntidades() {
+            const container = document.getElementById('entidades-table-container');
+            container.classList.remove('loading');
+            
+            if (!datosActuales || !datosActuales.entidades) {
+                container.innerHTML = '<p>No hay datos disponibles.</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            datosActuales.entidades.forEach(entidad => {
+                html += `
+                    <tr>
+                        <td>${entidad.id}</td>
+                        <td>${entidad.nombre}</td>
+                        <td>${entidad.tipo}</td>
+                        <td class="admin-actions">
+                            <button class="btn btn-default" onclick="verEntidad(${entidad.id})">Ver</button>
+                            <button class="btn btn-primary" onclick="editarEntidad(${entidad.id})">Editar</button>
+                            <button class="btn btn-secondary" onclick="eliminarEntidad(${entidad.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Función para mostrar la tabla de personas
+        function mostrarTablaPersonas() {
+            const container = document.getElementById('personas-table-container');
+            container.classList.remove('loading');
+            
+            if (!datosActuales || !datosActuales.personas) {
+                container.innerHTML = '<p>No hay datos disponibles.</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Cargo</th>
+                            <th>Entidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            datosActuales.personas.forEach(persona => {
+                // Encontrar el nombre de la entidad
+                const entidad = datosActuales.entidades.find(e => e.id === persona.entidad_id);
+                const nombreEntidad = entidad ? entidad.nombre : 'Desconocida';
+                
+                html += `
+                    <tr>
+                        <td>${persona.id}</td>
+                        <td>${persona.nombre}</td>
+                        <td>${persona.cargo}</td>
+                        <td>${nombreEntidad}</td>
+                        <td class="admin-actions">
+                            <button class="btn btn-default" onclick="verPersona(${persona.id})">Ver</button>
+                            <button class="btn btn-primary" onclick="editarPersona(${persona.id})">Editar</button>
+                            <button class="btn btn-secondary" onclick="eliminarPersona(${persona.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Función para mostrar la tabla de acciones
+        function mostrarTablaAcciones() {
+            const container = document.getElementById('acciones-table-container');
+            container.classList.remove('loading');
+            
+            if (!datosActuales || !datosActuales.acciones) {
+                container.innerHTML = '<p>No hay datos disponibles.</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Conflicto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            datosActuales.acciones.forEach(accion => {
+                // Encontrar el título del conflicto
+                const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+                const tituloConflicto = conflicto ? conflicto.titulo : 'Desconocido';
+                
+                html += `
+                    <tr>
+                        <td>${accion.id}</td>
+                        <td>${accion.tipo_accion}</td>
+                        <td>${accion.fecha}</td>
+                        <td>${tituloConflicto}</td>
+                        <td class="admin-actions">
+                            <button class="btn btn-default" onclick="verAccion(${accion.id})">Ver</button>
+                            <button class="btn btn-primary" onclick="editarAccion(${accion.id})">Editar</button>
+                            <button class="btn btn-secondary" onclick="eliminarAccion(${accion.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Funciones para ver, editar y eliminar elementos
+        function verConflicto(id) {
+            const conflicto = datosActuales.conflictos.find(c => c.id === id);
+            if (!conflicto) {
+                mostrarNotificacion(`No se encontró el conflicto con ID ${id}`, true);
+                return;
+            }
+            
+            // Obtener entidades involucradas
+            const entidadesNombres = conflicto.entidades_involucradas
+                .map(entidadId => {
+                    const entidad = datosActuales.entidades.find(e => e.id === entidadId);
+                    return entidad ? entidad.nombre : 'Desconocida';
+                })
+                .join(', ');
+            
+            // Obtener acciones relacionadas
+            const accionesConflicto = datosActuales.acciones
+                .filter(a => a.id_conflicto === id)
+                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            let accionesHTML = '';
+            if (accionesConflicto.length > 0) {
+                accionesHTML = '<h3>Acciones relacionadas</h3><ul>';
+                accionesConflicto.forEach(accion => {
+                    accionesHTML += `<li>${accion.fecha} - ${accion.tipo_accion}: ${accion.descripcion}</li>`;
+                });
+                accionesHTML += '</ul>';
+            } else {
+                accionesHTML = '<p>No hay acciones relacionadas.</p>';
+            }
+            
+            // Crear modal para ver detalles
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            modal.innerHTML = `
+                <h2>Detalles del Conflicto</h2>
+                <p><strong>ID:</strong> ${conflicto.id}</p>
+                <p><strong>Título:</strong> ${conflicto.titulo}</p>
+                <p><strong>Descripción:</strong> ${conflicto.descripcion}</p>
+                <p><strong>Fecha de Inicio:</strong> ${conflicto.fecha_inicio}</p>
+                <p><strong>Ubicación:</strong> ${conflicto.ubicacion || 'No especificada'}</p>
+                <p><strong>Estado:</strong> ${conflicto.estado}</p>
+                ${conflicto.fecha_fin ? `<p><strong>Fecha de Resolución:</strong> ${conflicto.fecha_fin}</p>` : ''}
+                <p><strong>Entidades Involucradas:</strong> ${entidadesNombres || 'Ninguna'}</p>
+                ${accionesHTML}
+                <button class="btn btn-default" onclick="this.parentNode.remove()">Cerrar</button>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function editarConflicto(id) {
+            const conflicto = datosActuales.conflictos.find(c => c.id === id);
+            if (!conflicto) {
+                mostrarNotificacion(`No se encontró el conflicto con ID ${id}`, true);
+                return;
+            }
+            
+            // Crear modal para editar
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            // Crear opciones para entidades
+            let opcionesEntidades = '';
+            datosActuales.entidades.forEach(entidad => {
+                opcionesEntidades += `<option value="${entidad.id}">${entidad.nombre}</option>`;
+            });
+            
+            modal.innerHTML = `
+                <h2>Editar Conflicto</h2>
+                <div class="form-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" value="${conflicto.titulo}">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion">${conflicto.descripcion}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_inicio">Fecha de Inicio:</label>
+                    <input type="date" id="fecha_inicio" value="${conflicto.fecha_inicio}">
+                </div>
+                <div class="form-group">
+                    <label for="ubicacion">Ubicación:</label>
+                    <input type="text" id="ubicacion" value="${conflicto.ubicacion || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <select id="estado">
+                        <option value="activo" ${conflicto.estado === 'activo' ? 'selected' : ''}>Activo</option>
+                        <option value="resuelto" ${conflicto.estado === 'resuelto' ? 'selected' : ''}>Resuelto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="entidades">Entidades Involucradas:</label>
+                    <select id="entidades" multiple>
+                        ${opcionesEntidades}
+                    </select>
+                    <small>Mantenga presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones.</small>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="guardarEdicionConflicto(${id})">Guardar</button>
+                    <button class="btn btn-default" onclick="this.parentNode.parentNode.remove()">Cancelar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Seleccionar las entidades involucradas
+            const selectEntidades = document.getElementById('entidades');
+            conflicto.entidades_involucradas.forEach(entidadId => {
+                for (let i = 0; i < selectEntidades.options.length; i++) {
+                    if (parseInt(selectEntidades.options[i].value) === entidadId) {
+                        selectEntidades.options[i].selected = true;
+                    }
+                }
+            });
+        }
+        
+        function guardarEdicionConflicto(id) {
+            const titulo = document.getElementById('titulo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const fecha_inicio = document.getElementById('fecha_inicio').value;
+            const ubicacion = document.getElementById('ubicacion').value;
+            const estado = document.getElementById('estado').value;
+            
+            // Obtener entidades seleccionadas
+            const selectEntidades = document.getElementById('entidades');
+            const entidades_involucradas = Array.from(selectEntidades.selectedOptions).map(option => parseInt(option.value));
+            
+            if (!titulo || !descripcion || !fecha_inicio) {
+                mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
+                return;
+            }
+            
+            // Actualizar el conflicto
+            const conflicto = datosActuales.conflictos.find(c => c.id === id);
+            if (conflicto) {
+                conflicto.titulo = titulo;
+                conflicto.descripcion = descripcion;
+                conflicto.fecha_inicio = fecha_inicio;
+                conflicto.ubicacion = ubicacion;
+                conflicto.estado = estado;
+                conflicto.entidades_involucradas = entidades_involucradas;
+                
+                // Si el estado es "resuelto", establecer la fecha de resolución como la fecha de la última acción
+                if (estado === 'resuelto') {
+                    // Obtener todas las acciones relacionadas con este conflicto
+                    const accionesConflicto = datosActuales.acciones.filter(a => a.id_conflicto === id);
+                    
+                    if (accionesConflicto.length > 0) {
+                        // Ordenar acciones por fecha (de más reciente a más antigua)
+                        accionesConflicto.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                        
+                        // Establecer la fecha de resolución como la fecha de la última acción
+                        conflicto.fecha_fin = accionesConflicto[0].fecha;
+                    } else {
+                        // Si no hay acciones, usar la fecha actual
+                        const hoy = new Date();
+                        const fechaFormateada = hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                        conflicto.fecha_fin = fechaFormateada;
+                    }
+                } else {
+                    // Si el estado es "activo", eliminar la fecha de resolución si existe
+                    delete conflicto.fecha_fin;
+                }
+                
+                // Registrar cambio pendiente
+                cambiosPendientes[`conflicto_${id}`] = true;
+                
+                // Actualizar tabla
+                mostrarTablaConflictos();
+                
+                // Cerrar modal
+                document.querySelector('div[style*="z-index: 10000"]').remove();
+                
+                mostrarNotificacion("Conflicto actualizado. Recuerde guardar los cambios.");
+            }
+        }
+        
+        function eliminarConflicto(id) {
+            if (confirm(`¿Está seguro de que desea eliminar el conflicto ${id}?`)) {
+                // Eliminar el conflicto de los datos
+                datosActuales.conflictos = datosActuales.conflictos.filter(c => c.id !== id);
+                
+                // Registrar el cambio
+                cambiosPendientes[`eliminar_conflicto_${id}`] = true;
+                
+                // Actualizar la tabla
+                mostrarTablaConflictos();
+                
+                alert(`Conflicto ${id} eliminado. Los cambios se guardarán cuando haga clic en "Guardar Todos los Cambios".`);
+            }
+        }
+        
+        // Funciones para entidades
+        function verEntidad(id) {
+            const entidad = datosActuales.entidades.find(e => e.id === id);
+            if (!entidad) {
+                mostrarNotificacion(`No se encontró la entidad con ID ${id}`, true);
+                return;
+            }
+            
+            // Crear modal para ver detalles
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            modal.innerHTML = `
+                <h2>Detalles de la Entidad</h2>
+                <p><strong>ID:</strong> ${entidad.id}</p>
+                <p><strong>Nombre:</strong> ${entidad.nombre}</p>
+                <p><strong>Tipo:</strong> ${entidad.tipo}</p>
+                <p><strong>Descripción:</strong> ${entidad.descripcion || 'No disponible'}</p>
+                <button class="btn btn-default" onclick="this.parentNode.remove()">Cerrar</button>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function editarEntidad(id) {
+            const entidad = datosActuales.entidades.find(e => e.id === id);
+            if (!entidad) {
+                mostrarNotificacion(`No se encontró la entidad con ID ${id}`, true);
+                return;
+            }
+            
+            // Crear modal para editar
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            modal.innerHTML = `
+                <h2>Editar Entidad</h2>
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" value="${entidad.nombre}">
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo">
+                        <option value="sindicato" ${entidad.tipo === 'sindicato' ? 'selected' : ''}>Sindicato</option>
+                        <option value="empresa" ${entidad.tipo === 'empresa' ? 'selected' : ''}>Empresa</option>
+                        <option value="gobierno" ${entidad.tipo === 'gobierno' ? 'selected' : ''}>Gobierno</option>
+                        <option value="otro" ${entidad.tipo === 'otro' ? 'selected' : ''}>Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion">${entidad.descripcion || ''}</textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="guardarEdicionEntidad(${id})">Guardar</button>
+                    <button class="btn btn-default" onclick="this.parentNode.parentNode.remove()">Cancelar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function guardarEdicionEntidad(id) {
+            const nombre = document.getElementById('nombre').value;
+            const tipo = document.getElementById('tipo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            
+            if (!nombre || !tipo) {
+                mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
+                return;
+            }
+            
+            // Actualizar la entidad
+            const entidad = datosActuales.entidades.find(e => e.id === id);
+            if (entidad) {
+                entidad.nombre = nombre;
+                entidad.tipo = tipo;
+                entidad.descripcion = descripcion;
+                
+                // Registrar cambio pendiente
+                cambiosPendientes[`entidad_${id}`] = true;
+                
+                // Actualizar tabla
+                mostrarTablaEntidades();
+                
+                // Cerrar modal
+                document.querySelector('div[style*="z-index: 10000"]').remove();
+                
+                mostrarNotificacion("Entidad actualizada. Recuerde guardar los cambios.");
+            }
+        }
+        
+        function eliminarEntidad(id) {
+            // Verificar si la entidad está siendo utilizada por personas o conflictos
+            const personasAsociadas = datosActuales.personas.filter(p => p.entidad_id === id);
+            const conflictosAsociados = datosActuales.conflictos.filter(c => c.entidades_involucradas.includes(id));
+            
+            if (personasAsociadas.length > 0 || conflictosAsociados.length > 0) {
+                let mensaje = "No se puede eliminar esta entidad porque está siendo utilizada por:";
+                
+                if (personasAsociadas.length > 0) {
+                    mensaje += `\n- ${personasAsociadas.length} persona(s)`;
+                }
+                
+                if (conflictosAsociados.length > 0) {
+                    mensaje += `\n- ${conflictosAsociados.length} conflicto(s)`;
+                }
+                
+                mensaje += "\n\nDebe eliminar estas referencias primero.";
+                
+                alert(mensaje);
+                return;
+            }
+            
+            if (confirm(`¿Está seguro de que desea eliminar la entidad ${id}?`)) {
+                // Eliminar la entidad de los datos
+                datosActuales.entidades = datosActuales.entidades.filter(e => e.id !== id);
+                
+                // Registrar el cambio
+                cambiosPendientes[`eliminar_entidad_${id}`] = true;
+                
+                // Actualizar la tabla
+                mostrarTablaEntidades();
+                
+                mostrarNotificacion(`Entidad ${id} eliminada. Recuerde guardar los cambios.`);
+            }
+        }
+        
+        // Funciones para personas
+        function verPersona(id) {
+            const persona = datosActuales.personas.find(p => p.id === id);
+            if (!persona) {
+                mostrarNotificacion(`No se encontró la persona con ID ${id}`, true);
+                return;
+            }
+            
+            // Encontrar el nombre de la entidad
+            const entidad = datosActuales.entidades.find(e => e.id === persona.entidad_id);
+            const nombreEntidad = entidad ? entidad.nombre : 'Desconocida';
+            
+            // Crear modal para ver detalles
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            modal.innerHTML = `
+                <h2>Detalles de la Persona</h2>
+                <p><strong>ID:</strong> ${persona.id}</p>
+                <p><strong>Nombre:</strong> ${persona.nombre}</p>
+                <p><strong>Cargo:</strong> ${persona.cargo}</p>
+                <p><strong>Entidad:</strong> ${nombreEntidad} (ID: ${persona.entidad_id})</p>
+                <button class="btn btn-default" onclick="this.parentNode.remove()">Cerrar</button>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function editarPersona(id) {
+            const persona = datosActuales.personas.find(p => p.id === id);
+            if (!persona) {
+                mostrarNotificacion(`No se encontró la persona con ID ${id}`, true);
+                return;
+            }
+            
+            // Crear modal para editar
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            // Crear opciones para entidades
+            let opcionesEntidades = '';
+            datosActuales.entidades.forEach(entidad => {
+                opcionesEntidades += `<option value="${entidad.id}" ${persona.entidad_id === entidad.id ? 'selected' : ''}>${entidad.nombre}</option>`;
+            });
+            
+            modal.innerHTML = `
+                <h2>Editar Persona</h2>
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" value="${persona.nombre}">
+                </div>
+                <div class="form-group">
+                    <label for="cargo">Cargo:</label>
+                    <input type="text" id="cargo" value="${persona.cargo}">
+                </div>
+                <div class="form-group">
+                    <label for="entidad_id">Entidad:</label>
+                    <select id="entidad_id">
+                        ${opcionesEntidades}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="guardarEdicionPersona(${id})">Guardar</button>
+                    <button class="btn btn-default" onclick="this.parentNode.parentNode.remove()">Cancelar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function guardarEdicionPersona(id) {
+            const nombre = document.getElementById('nombre').value;
+            const cargo = document.getElementById('cargo').value;
+            const entidad_id = parseInt(document.getElementById('entidad_id').value);
+            
+            if (!nombre || !cargo) {
+                mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
+                return;
+            }
+            
+            // Actualizar la persona
+            const persona = datosActuales.personas.find(p => p.id === id);
+            if (persona) {
+                persona.nombre = nombre;
+                persona.cargo = cargo;
+                persona.entidad_id = entidad_id;
+                
+                // Registrar cambio pendiente
+                cambiosPendientes[`persona_${id}`] = true;
+                
+                // Actualizar tabla
+                mostrarTablaPersonas();
+                
+                // Cerrar modal
+                document.querySelector('div[style*="z-index: 10000"]').remove();
+                
+                mostrarNotificacion("Persona actualizada. Recuerde guardar los cambios.");
+            }
+        }
+        
+        function eliminarPersona(id) {
+            if (confirm(`¿Está seguro de que desea eliminar la persona ${id}?`)) {
+                // Eliminar la persona de los datos
+                datosActuales.personas = datosActuales.personas.filter(p => p.id !== id);
+                
+                // Registrar el cambio
+                cambiosPendientes[`eliminar_persona_${id}`] = true;
+                
+                // Actualizar la tabla
+                mostrarTablaPersonas();
+                
+                mostrarNotificacion(`Persona ${id} eliminada. Recuerde guardar los cambios.`);
+            }
+        }
+        
+        // Funciones para acciones
+        function verAccion(id) {
+            const accion = datosActuales.acciones.find(a => a.id === id);
+            if (!accion) {
+                mostrarNotificacion(`No se encontró la acción con ID ${id}`, true);
+                return;
+            }
+            
+            // Encontrar el título del conflicto
+            const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+            const tituloConflicto = conflicto ? conflicto.titulo : 'Desconocido';
+            
+            // Obtener nombres de entidades involucradas
+            const entidadesInvolucradas = accion.entidades_involucradas.map(id => {
+                const entidad = datosActuales.entidades.find(e => e.id === id);
+                return entidad ? entidad.nombre : `Entidad ${id}`;
+            }).join(', ');
+            
+            // Crear modal para ver detalles
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            modal.innerHTML = `
+                <h2>Detalles de la Acción</h2>
+                <p><strong>ID:</strong> ${accion.id}</p>
+                <p><strong>Tipo:</strong> ${accion.tipo_accion}</p>
+                <p><strong>Fecha:</strong> ${accion.fecha}</p>
+                <p><strong>Descripción:</strong> ${accion.descripcion}</p>
+                <p><strong>Conflicto:</strong> ${tituloConflicto} (ID: ${accion.id_conflicto})</p>
+                <p><strong>Entidades Involucradas:</strong> ${entidadesInvolucradas}</p>
+                <button class="btn btn-default" onclick="this.parentNode.remove()">Cerrar</button>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function editarAccion(id) {
+            const accion = datosActuales.acciones.find(a => a.id === id);
+            if (!accion) {
+                mostrarNotificacion(`No se encontró la acción con ID ${id}`, true);
+                return;
+            }
+            
+            // Crear modal para editar
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.borderRadius = '5px';
+            modal.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            modal.style.zIndex = '10000';
+            modal.style.maxWidth = '80%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+            
+            // Crear opciones para conflictos
+            let opcionesConflictos = '';
+            datosActuales.conflictos.forEach(conflicto => {
+                opcionesConflictos += `<option value="${conflicto.id}" ${accion.id_conflicto === conflicto.id ? 'selected' : ''}>${conflicto.titulo}</option>`;
+            });
+            
+            // Crear opciones para entidades
+            let opcionesEntidades = '';
+            datosActuales.entidades.forEach(entidad => {
+                opcionesEntidades += `<option value="${entidad.id}">${entidad.nombre}</option>`;
+            });
+            
+            modal.innerHTML = `
+                <h2>Editar Acción</h2>
+                <div class="form-group">
+                    <label for="tipo_accion">Tipo:</label>
+                    <input type="text" id="tipo_accion" value="${accion.tipo_accion || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" value="${accion.fecha}">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion">${accion.descripcion}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fuente">Fuente:</label>
+                    <input type="text" id="fuente" value="${accion.fuente || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="id_conflicto">Conflicto:</label>
+                    <select id="id_conflicto">
+                        ${opcionesConflictos}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="entidades_involucradas">Entidades Involucradas:</label>
+                    <select id="entidades_involucradas" multiple>
+                        ${opcionesEntidades}
+                    </select>
+                    <small>Mantenga presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones.</small>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="guardarEdicionAccion(${id})">Guardar</button>
+                    <button class="btn btn-default" onclick="this.parentNode.parentNode.remove()">Cancelar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Seleccionar las entidades involucradas
+            const selectEntidades = document.getElementById('entidades_involucradas');
+            accion.entidades_involucradas.forEach(entidadId => {
+                for (let i = 0; i < selectEntidades.options.length; i++) {
+                    if (parseInt(selectEntidades.options[i].value) === entidadId) {
+                        selectEntidades.options[i].selected = true;
+                    }
+                }
+            });
+        }
+        
+        function guardarEdicionAccion(id) {
+            const tipo_accion = document.getElementById('tipo_accion').value;
+            const fecha = document.getElementById('fecha').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const fuente = document.getElementById('fuente').value;
+            const id_conflicto = parseInt(document.getElementById('id_conflicto').value);
+            
+            // Obtener entidades seleccionadas
+            const selectEntidades = document.getElementById('entidades_involucradas');
+            const entidades_involucradas = Array.from(selectEntidades.selectedOptions).map(option => parseInt(option.value));
+            
+            if (!tipo_accion || !fecha || !descripcion) {
+                mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
+                return;
+            }
+            
+            // Actualizar la acción
+            const accion = datosActuales.acciones.find(a => a.id === id);
+            if (accion) {
+                accion.tipo_accion = tipo_accion;
+                accion.fecha = fecha;
+                accion.descripcion = descripcion;
+                accion.fuente = fuente;
+                accion.id_conflicto = id_conflicto;
+                accion.entidades_involucradas = entidades_involucradas;
+                
+                // Registrar cambio pendiente
+                cambiosPendientes[`accion_${id}`] = true;
+                
+                // Actualizar tabla
+                mostrarTablaAcciones();
+                
+                // Cerrar modal
+                document.querySelector('div[style*="z-index: 10000"]').remove();
+                
+                mostrarNotificacion("Acción actualizada. Recuerde guardar los cambios.");
+            }
+        }
+        
+        function eliminarAccion(id) {
+            if (confirm(`¿Está seguro de que desea eliminar la acción ${id}?`)) {
+                // Eliminar la acción de los datos
+                datosActuales.acciones = datosActuales.acciones.filter(a => a.id !== id);
+                
+                // Registrar el cambio
+                cambiosPendientes[`eliminar_accion_${id}`] = true;
+                
+                // Actualizar la tabla
+                mostrarTablaAcciones();
+                
+                mostrarNotificacion(`Acción ${id} eliminada. Recuerde guardar los cambios.`);
+            }
+        }
+        
+        // Función para guardar todos los cambios en JSONBin.io
+        async function guardarTodosCambios() {
+            if (Object.keys(cambiosPendientes).length === 0) {
+                mostrarNotificacion("No hay cambios pendientes para guardar.");
+                return;
+            }
+            
+            if (confirm(`¿Está seguro de que desea guardar todos los cambios?`)) {
+                try {
+                    mostrarNotificacion("Guardando cambios...");
+                    
+                    // Preparar los datos para enviar a JSONBin.io
+                    const datosParaEnviar = {
+                        conflictos: datosActuales.conflictos,
+                        entidades: datosActuales.entidades,
+                        personas: datosActuales.personas,
+                        acciones: datosActuales.acciones
+                    };
+                    
+                    // Realizar la solicitud PUT a JSONBin.io
+                    const response = await fetch(BASE_URL, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': API_KEY,
+                            'X-Access-Key': ACCESS_KEY
+                        },
+                        body: JSON.stringify(datosParaEnviar)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error al guardar: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const resultado = await response.json();
+                    console.log("Respuesta del servidor:", resultado);
+                    
+                    // Limpiar cambios pendientes
+                    cambiosPendientes = {};
+                    
+                    mostrarNotificacion("Todos los cambios han sido guardados con éxito en JSONBin.io.");
+                    
+                    // Opcional: recargar los datos para asegurarse de que todo está sincronizado
+                    await cargarDatos();
+                    
+                    // Actualizar las tablas
+                    mostrarTablaConflictos();
+                    mostrarTablaEntidades();
+                    mostrarTablaPersonas();
+                    mostrarTablaAcciones();
+                    
+                } catch (error) {
+                    console.error("Error al guardar cambios:", error);
+                    mostrarNotificacion(`Error al guardar cambios: ${error.message}`, true);
+                }
+            }
+        }
+        
+        // Función para mostrar formulario de agregar
+        function showAddForm(tipo) {
+            alert(`Mostrar formulario para agregar ${tipo}`);
+            // Aquí implementarías la lógica para mostrar el formulario correspondiente
+        }
+        
+        // Función para guardar configuración
+        function saveConfig() {
+            const siteTitle = document.getElementById('site-title').value;
+            const siteDescription = document.getElementById('site-description').value;
+            
+            // Registrar cambios
+            cambiosPendientes['config'] = {
+                title: siteTitle,
+                description: siteDescription
+            };
+            
+            alert("Configuración guardada. Los cambios se aplicarán cuando haga clic en 'Guardar Todos los Cambios'.");
+        }
+        
+        // Función para agregar menú de importar JSON
+        function agregarMenuImportarJSON() {
+            const adminMenu = document.querySelector('.admin-menu');
+            
+            if (adminMenu) {
+                // Agregar opción al menú
+                const menuItem = document.createElement('li');
+                menuItem.innerHTML = '<a onclick="showSection(\'importar-json\')">Importar JSON</a>';
+                adminMenu.appendChild(menuItem);
+                
+                // Crear la sección de importar JSON
+                const adminMain = document.querySelector('.admin-main');
+                
+                if (adminMain) {
+                    const seccionImportarJSON = document.createElement('div');
+                    seccionImportarJSON.id = 'section-importar-json';
+                    seccionImportarJSON.className = 'admin-section';
+                    seccionImportarJSON.style.display = 'none';
+                    
+                    seccionImportarJSON.innerHTML = `
+                        <h2 class="admin-section-title">Importar JSON</h2>
+                        
+                        <div class="admin-form">
+                            <div class="form-group">
+                                <label for="nuevosDatos">Nuevos datos en formato JSON:</label>
+                                <textarea id="nuevosDatos" rows="10" style="width: 100%; min-height: 300px;" placeholder="Escribe los nuevos datos en formato JSON..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="actualizarDatos()">Actualizar JSON</button>
+                            </div>
+                            
+                            <div id="mensaje-json" style="margin-top: 20px;"></div>
+                        </div>
+                    `;
+                    
+                    adminMain.appendChild(seccionImportarJSON);
+                }
+            }
+        }
+        
+        // Función para actualizar datos desde JSON
+        async function actualizarDatos() {
+            const nuevosDatos = document.getElementById("nuevosDatos").value;
+            const mensaje = document.getElementById("mensaje-json");
+            
+            if (!nuevosDatos.trim()) {
+                mensaje.innerHTML = '<div style="color: red;">Por favor, ingresa datos en formato JSON.</div>';
+                return;
+            }
+            
+            try {
+                // Mostrar mensaje de carga
+                mensaje.innerHTML = '<div>Procesando...</div>';
+                
+                // Convertir los nuevos datos a JSON
+                const nuevos = JSON.parse(nuevosDatos);
+                
+                // Obtener datos actuales
+                const response = await fetch(BASE_URL, {
+                    method: "GET",
+                    headers: { 
+                        "X-Master-Key": API_KEY,
+                        "X-Access-Key": ACCESS_KEY
+                    }
+                });
+                
+                if (!response.ok) throw new Error("Error al obtener datos actuales.");
+                
+                let dataActual = await response.json();
+                dataActual = dataActual.record;
+                
+                // Categorías permitidas
+                const categorias = ["conflictos", "entidades", "personas", "acciones"];
+                
+                // Agregar datos nuevos en las categorías detectadas
+                categorias.forEach(cat => {
+                    if (nuevos[cat]) {
+                        if (!Array.isArray(dataActual[cat])) dataActual[cat] = [];
+                        dataActual[cat] = [...dataActual[cat], ...nuevos[cat]];
+                    }
+                });
+                
+                // Subir datos actualizados
+                const updateResponse = await fetch(BASE_URL, {
+                    method: "PUT",
+                    headers: {
+                        "X-Master-Key": API_KEY,
+                        "X-Access-Key": ACCESS_KEY,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dataActual)
+                });
+                
+                if (!updateResponse.ok) throw new Error("Error al actualizar los datos.");
+                
+                // Actualizar datos actuales
+                datosActuales = dataActual;
+                
+                // Actualizar tablas
+                mostrarTablaConflictos();
+                mostrarTablaEntidades();
+                mostrarTablaPersonas();
+                mostrarTablaAcciones();
+                
+                mensaje.innerHTML = '<div style="color: green;">Datos actualizados con éxito.</div>';
+            } catch (error) {
+                mensaje.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

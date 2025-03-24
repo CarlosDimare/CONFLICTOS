@@ -1088,7 +1088,7 @@
             </div>
             <div>
               <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
-              <span style="margin: 0 5px;">|</span>
+              <span style="margin: 0 5px;"> | </span>
               <span>${accion.descripcion}</span>
             </div>
           </div>
@@ -1553,8 +1553,10 @@
             <div style="margin-bottom: 10px;">
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
-            <div style="margin-bottom: 10px; display: flex; align-items: center;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
+            <div  <div style="margin-bottom: 10px; display: flex; align-items: center;">
+            <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}</span>
+             <span style="margin: 0 5px;"> | </span>
+             <span>${accion.descripcion}</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>
@@ -1635,7 +1637,8 @@
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
             <div style="margin-bottom: 10px; display: flex; align-items: center;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | </span>
+              <span>${accion.descripcion || 'Sin descripción'}</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>
@@ -2538,7 +2541,8 @@
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
             <div style="margin-bottom: 10px; display: flex; align-items: center;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)}   |   </span>
+              <span>${accion.descripcion || 'Sin descripción'}</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>

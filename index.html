@@ -914,53 +914,64 @@
     }
 
     function mostrarConflictos() {
-      const contenedor = document.getElementById("lista-conflictos")
-      contenedor.innerHTML = ""
-      
+      const contenedor = document.getElementById("lista-conflictos");
+      contenedor.innerHTML = "";
+
       if (datosActuales && datosActuales.conflictos && datosActuales.conflictos.length > 0) {
         const conflictosOrdenados = datosActuales.conflictos.map(conflicto => {
-          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id)
+          const acciones = datosActuales.acciones.filter(a => a.id_conflicto === conflicto.id);
           const ultimaAccion = acciones.length > 0 
             ? acciones.reduce((a, b) => new Date(a.fecha) > new Date(b.fecha) ? a : b)
-            : null
+            : null;
           return {
             ...conflicto,
             ultimaAccion
-          }
+          };
         }).sort((a, b) => {
-          if (!a.ultimaAccion) return 1
-          if (!b.ultimaAccion) return -1
-          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha)
-        })
+          if (!a.ultimaAccion) return 1;
+          if (!b.ultimaAccion) return -1;
+          return new Date(b.ultimaAccion.fecha) - new Date(a.ultimaAccion.fecha);
+        });
 
         conflictosOrdenados.forEach((conflicto) => {
-          const card = document.createElement("div")
-          card.className = "card"
+          const card = document.createElement("div");
+          card.className = "card";
           // Calcular duración considerando si está resuelto o no
           const duracion = calcularDuracion(
             conflicto.fecha_inicio, 
             conflicto.estado === "resuelto" ? conflicto.fecha_fin : null
           );
-          
+
           // Determinar el color del indicador de estado
           const estadoColor = conflicto.estado === "resuelto" ? "#4CAF50" : "#f71616";
-          
-          let ultimaAccionTexto = ''
+
+          // Obtener la entidad involucrada que sea tipo empresa
+          const entidadInvolucrada = datosActuales.entidades.find(e => 
+            conflicto.entidades_involucradas.includes(e.id) && e.tipo === "empresa"
+          );
+
+          // Logo de la entidad
+          const logo = entidadInvolucrada ? `<img src="${entidadInvolucrada.logo}" alt="${entidadInvolucrada.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">` : '';
+
+          let ultimaAccionTexto = '';
           if (conflicto.ultimaAccion) {
             const diasDesdeUltimaAccion = Math.floor(
               (new Date() - new Date(conflicto.ultimaAccion.fecha)) / (1000 * 60 * 60 * 24)
-            )
+            );
             ultimaAccionTexto = `
               <div class="ultima-accion">
                 <span style="color: #f71616;">Última acción | </span>
                 <span style="color: #f71616;">${capitalizarPrimeraLetra(conflicto.ultimaAccion.tipo_accion)}</span>
                 <span style="color: #f71616;"> hace ${diasDesdeUltimaAccion} días</span>
-              </div>`
+              </div>`;
           }
 
           card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <h3 style="margin: 0;">${conflicto.titulo}</h3>
+              <div style="display: flex; align-items: center;">
+                ${logo}
+                <h3 style="margin: 0;">${conflicto.titulo}</h3>
+              </div>
               <div style="display: flex; align-items: center;">
                 <span class="estado-indicador" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${estadoColor}; margin-right: 8px;"></span>
                 <span style="color: #f71616; font-weight: bold;">Día ${duracion}</span>
@@ -968,12 +979,12 @@
             </div>
             <p>${vistaCompacta ? conflicto.descripcion.substring(0, 80) + '...' : conflicto.descripcion}</p>
             ${ultimaAccionTexto}
-          `
-          card.onclick = () => mostrarFichaConflicto(conflicto.id)
-          contenedor.appendChild(card)
-        })
+          `;
+          card.onclick = () => mostrarFichaConflicto(conflicto.id);
+          contenedor.appendChild(card);
+        });
       } else {
-        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>"
+        contenedor.innerHTML = "<p>No hay conflictos registrados.</p>";
       }
     }
 
@@ -1089,16 +1100,32 @@
         ? conflicto.entidades_involucradas
             .map(id => datosActuales.entidades.find(e => e.id === id))
             .filter(e => e)
-            .map(e => e.nombre)
-            .join(", ")
+            .map(e => `
+              <div style="display: flex; align-items: center;">
+                <img src="${e.logo}" alt="${e.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">
+                <span>${e.nombre}</span>
+              </div>
+            `)
+            .join('')
         : "No especificadas";
+
+      // Obtener la entidad involucrada que sea tipo empresa
+      const entidadInvolucrada = datosActuales.entidades.find(e => 
+        conflicto.entidades_involucradas.includes(e.id) && e.tipo === "empresa"
+      );
+
+      // Logo de la entidad
+      const logo = entidadInvolucrada ? `<img src="${entidadInvolucrada.logo}" alt="${entidadInvolucrada.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">` : '';
 
       // Actualizar el contenido de la ficha
       fichaConflictoView.innerHTML = `
         <div class="container" style="padding-top: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>${conflicto.titulo}</h2>  <span style="font-weight: bold; font-size: 1.6em;">Día ${duracionDias}</span>
-           
+            <div style="display: flex; align-items: center;">
+              ${logo}
+              <h2>${conflicto.titulo}</h2>
+            </div>
+            <span style="font-weight: bold; font-size: 1.6em;">Día ${duracionDias}</span>
           </div>
           
           <div style="display: block;">
@@ -1499,33 +1526,44 @@
       const accionesOrdenadas = [...datosActuales.acciones].sort((a, b) => 
         new Date(b.fecha) - new Date(a.fecha)
       );
-      
+
       accionesOrdenadas.forEach(accion => {
-        const conflicto = datosActuales.conflictos.find(c => c.id === accion.id_conflicto);
+        const conflicto = accion.id_conflicto 
+          ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
+          : null;
+
+        // Asegúrate de que conflicto no sea null antes de continuar
         if (!conflicto) return; // Saltar si no hay conflicto asociado
-        
+
+        // Obtener la entidad involucrada que sea tipo empresa
+        const entidadInvolucrada = datosActuales.entidades.find(e => 
+          conflicto.entidades_involucradas.includes(e.id) && e.tipo === "empresa"
+        );
+
+        // Logo de la entidad
+        const logo = entidadInvolucrada ? `<img src="${entidadInvolucrada.logo}" alt="${entidadInvolucrada.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">` : '';
+
         const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
-        
+
         const card = document.createElement("div");
         card.className = "accion-card";
-        
+
         card.innerHTML = `
           <div style="display: flex; flex-direction: column;">
             <div style="margin-bottom: 10px;">
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
-            <div style="margin-bottom: 10px;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
-              <span style="margin: 0 5px;">|</span>
-              <span>${accion.descripcion || 'Sin descripción'}</span>
+            <div style="margin-bottom: 10px; display: flex; align-items: center;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
             </div>
-            <div style="margin-top: 5px; font-size: 0.9em;">
+            <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>
+              ${logo}
               <span>${conflicto.titulo}</span>
             </div>
           </div>
         `;
-        
+
         card.onclick = () => mostrarFichaAccion(accion.id);
         fragment.appendChild(card);
       });
@@ -1575,36 +1613,38 @@
           ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
           : null;
         
+        // Asegúrate de que conflicto no sea null antes de continuar
         if (!conflicto) return; // Saltar si no hay conflicto asociado
-        
+
+        // Obtener la entidad involucrada que sea tipo empresa
+        const entidadInvolucrada = datosActuales.entidades.find(e => 
+          conflicto.entidades_involucradas.includes(e.id) && e.tipo === "empresa"
+        );
+
+        // Logo de la entidad
+        const logo = entidadInvolucrada ? `<img src="${entidadInvolucrada.logo}" alt="${entidadInvolucrada.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">` : '';
+
         const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
-        
+
         const card = document.createElement("div");
-        card.className = "card";
-        card.style.margin = "10px 0";
-        card.style.padding = "15px";
-        card.style.borderRadius = "8px";
-        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-        card.style.backgroundColor = "#fff";
-        card.style.cursor = "pointer";
-        
+        card.className = "accion-card";
+
         card.innerHTML = `
           <div style="display: flex; flex-direction: column;">
             <div style="margin-bottom: 10px;">
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
-            <div style="margin-bottom: 10px;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
-              <span style="margin: 0 5px;">|</span>
-              <span>${accion.descripcion || 'Sin descripción'}</span>
+            <div style="margin-bottom: 10px; display: flex; align-items: center;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
             </div>
-            <div style="margin-top: 5px; font-size: 0.9em;">
+            <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>
+              ${logo}
               <span>${conflicto.titulo}</span>
             </div>
           </div>
         `;
-        
+
         card.onclick = () => mostrarFichaAccion(accion.id);
         listaAcciones.appendChild(card);
       });
@@ -1759,7 +1799,10 @@
                 const li = document.createElement("li");
                 li.setAttribute("data-id", entidad.id);
                 li.innerHTML = `
-                  ${entidad.nombre}
+                  <div style="display: flex; align-items: center;">
+                    <img src="${entidad.logo}" alt="${entidad.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">
+                    ${entidad.nombre}
+                  </div>
                   <button onclick="this.parentNode.remove()" style="background: none; border: none; color: var(--color-primary); cursor: pointer; margin-left: 10px;">
                     <i class="fas fa-times"></i>
                   </button>
@@ -2473,36 +2516,38 @@
           ? datosActuales.conflictos.find(c => c.id === accion.id_conflicto) 
           : null;
         
+        // Asegúrate de que conflicto no sea null antes de continuar
         if (!conflicto) return; // Saltar si no hay conflicto asociado
-        
+
+        // Obtener la entidad involucrada que sea tipo empresa
+        const entidadInvolucrada = datosActuales.entidades.find(e => 
+          conflicto.entidades_involucradas.includes(e.id) && e.tipo === "empresa"
+        );
+
+        // Logo de la entidad
+        const logo = entidadInvolucrada ? `<img src="${entidadInvolucrada.logo}" alt="${entidadInvolucrada.nombre}" style="width: 30px; height: 30px; margin-right: 8px;">` : '';
+
         const tiempoTranscurrido = calcularTiempoTranscurrido(accion.fecha);
-        
+
         const card = document.createElement("div");
-        card.className = "card";
-        card.style.margin = "10px 0";
-        card.style.padding = "15px";
-        card.style.borderRadius = "8px";
-        card.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-        card.style.backgroundColor = "#fff";
-        card.style.cursor = "pointer";
-        
+        card.className = "accion-card";
+
         card.innerHTML = `
           <div style="display: flex; flex-direction: column;">
             <div style="margin-bottom: 10px;">
               <span style="color: #f71616; font-weight: bold; font-size: 1.1em;">Hace ${tiempoTranscurrido}</span>
             </div>
-            <div style="margin-bottom: 10px;">
-              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion || 'acción')}</span>
-              <span style="margin: 0 5px;">|</span>
-              <span>${accion.descripcion || 'Sin descripción'}</span>
+            <div style="margin-bottom: 10px; display: flex; align-items: center;">
+              <span style="font-weight: bold;">${capitalizarPrimeraLetra(accion.tipo_accion)} | ${accion.descripcion || 'Sin descripción'}</span>
             </div>
-            <div style="margin-top: 5px; font-size: 0.9em;">
+            <div style="margin-top: 5px; font-size: 0.9em; display: flex; align-items: center;">
               <span style="color: #666;">Conflicto: </span>
+              ${logo}
               <span>${conflicto.titulo}</span>
             </div>
           </div>
         `;
-        
+
         card.onclick = () => mostrarFichaAccion(accion.id);
         listaAcciones.appendChild(card);
       });

@@ -256,6 +256,20 @@
                     <button class="btn btn-primary" onclick="showAddForm('conflicto')">Agregar Nuevo Conflicto</button>
                     <div id="conflictos-table-container" class="loading">
                     </div>
+                    
+                    <!-- Mostrar el mapa de la ubicación -->
+                    <div id="map-container" style="margin-top: 20px;">
+                        <h3>Ubicación del Conflicto</h3>
+                        <iframe 
+                            id="map" 
+                            src="" 
+                            width="100%" 
+                            height="300" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
                 </div>
                 
                 <!-- Sección de entidades -->
@@ -514,7 +528,9 @@
                         <td>${conflicto.id}</td>
                         <td>${conflicto.titulo}</td>
                         <td>${conflicto.fecha_inicio}</td>
-                        <td>${conflicto.ubicacion || 'No especificada'}</td>
+                        <td>
+                            <a href="${conflicto.link_ubicacion}" target="_blank">${conflicto.link_ubicacion}</a>
+                        </td>
                         <td>
                             ${conflicto.estado}
                             <span class="admin-badge ${conflicto.estado === 'activo' ? 'badge-active' : 'badge-inactive'}">
@@ -536,6 +552,13 @@
             `;
             
             container.innerHTML = html;
+
+            // Actualizar el iframe del mapa con la ubicación del primer conflicto (o el que se seleccione)
+            if (datosActuales.conflictos.length > 0) {
+                const primerConflicto = datosActuales.conflictos[0]; // Cambia esto según la lógica que desees
+                const mapIframe = document.getElementById('map');
+                mapIframe.src = `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(primerConflicto.link_ubicacion)}`; // Usar el enlace directamente
+            }
         }
         
         // Función para mostrar la tabla de entidades
@@ -787,6 +810,10 @@
                     <input type="text" id="titulo" value="${conflicto.titulo}">
                 </div>
                 <div class="form-group">
+                    <label for="subtitulo">Subtítulo:</label>
+                    <input type="text" id="subtitulo" value="${conflicto.subtitulo || ''}">
+                </div>
+                <div class="form-group">
                     <label for="descripcion">Descripción:</label>
                     <textarea id="descripcion">${conflicto.descripcion}</textarea>
                 </div>
@@ -797,6 +824,10 @@
                 <div class="form-group">
                     <label for="ubicacion">Ubicación:</label>
                     <input type="text" id="ubicacion" value="${conflicto.ubicacion || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="link_ubicacion">Enlace de Ubicación:</label>
+                    <input type="text" id="link_ubicacion" value="${conflicto.link_ubicacion || ''}" placeholder="URL del mapa o dirección">
                 </div>
                 <div class="form-group">
                     <label for="estado">Estado:</label>
@@ -833,16 +864,18 @@
         
         function guardarEdicionConflicto(id) {
             const titulo = document.getElementById('titulo').value;
+            const subtitulo = document.getElementById('subtitulo').value;
             const descripcion = document.getElementById('descripcion').value;
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const ubicacion = document.getElementById('ubicacion').value;
+            const link_ubicacion = document.getElementById('link_ubicacion').value;
             const estado = document.getElementById('estado').value;
             
             // Obtener entidades seleccionadas
             const selectEntidades = document.getElementById('entidades');
             const entidades_involucradas = Array.from(selectEntidades.selectedOptions).map(option => parseInt(option.value));
             
-            if (!titulo || !descripcion || !fecha_inicio) {
+            if (!titulo || !subtitulo || !descripcion || !fecha_inicio) {
                 mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
                 return;
             }
@@ -851,33 +884,13 @@
             const conflicto = datosActuales.conflictos.find(c => c.id === id);
             if (conflicto) {
                 conflicto.titulo = titulo;
+                conflicto.subtitulo = subtitulo;
                 conflicto.descripcion = descripcion;
                 conflicto.fecha_inicio = fecha_inicio;
                 conflicto.ubicacion = ubicacion;
+                conflicto.link_ubicacion = link_ubicacion;
                 conflicto.estado = estado;
                 conflicto.entidades_involucradas = entidades_involucradas;
-                
-                // Si el estado es "resuelto", establecer la fecha de resolución como la fecha de la última acción
-                if (estado === 'resuelto') {
-                    // Obtener todas las acciones relacionadas con este conflicto
-                    const accionesConflicto = datosActuales.acciones.filter(a => a.id_conflicto === id);
-                    
-                    if (accionesConflicto.length > 0) {
-                        // Ordenar acciones por fecha (de más reciente a más antigua)
-                        accionesConflicto.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-                        
-                        // Establecer la fecha de resolución como la fecha de la última acción
-                        conflicto.fecha_fin = accionesConflicto[0].fecha;
-                    } else {
-                        // Si no hay acciones, usar la fecha actual
-                        const hoy = new Date();
-                        const fechaFormateada = hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-                        conflicto.fecha_fin = fechaFormateada;
-                    }
-                } else {
-                    // Si el estado es "activo", eliminar la fecha de resolución si existe
-                    delete conflicto.fecha_fin;
-                }
                 
                 // Registrar cambio pendiente
                 cambiosPendientes[`conflicto_${id}`] = true;
@@ -972,19 +985,18 @@
                 </div>
                 <div class="form-group">
                     <label for="tipo">Tipo:</label>
-                    <select id="tipo">
-                        <option value="sindicato" ${entidad.tipo === 'sindicato' ? 'selected' : ''}>Sindicato</option>
-                        <option value="empresa" ${entidad.tipo === 'empresa' ? 'selected' : ''}>Empresa</option>
-                        <option value="gobierno" ${entidad.tipo === 'gobierno' ? 'selected' : ''}>Gobierno</option>
-                        <option value="otro" ${entidad.tipo === 'otro' ? 'selected' : ''}>Otro</option>
-                    </select>
+                    <input type="text" id="tipo" value="${entidad.tipo}">
                 </div>
                 <div class="form-group">
                     <label for="descripcion">Descripción:</label>
                     <textarea id="descripcion">${entidad.descripcion || ''}</textarea>
                 </div>
+                <div class="form-group">
+                    <label for="logo">Logo (URL):</label>
+                    <input type="text" id="logo" value="${entidad.logo || ''}" placeholder="URL del logo de la entidad">
+                </div>
                 <div class="form-actions">
-                    <button class="btn btn-primary" onclick="guardarEdicionEntidad(${id})">Guardar</button>
+                    <button class="btn btn-primary" onclick="guardarEntidad(${id})">Guardar</button>
                     <button class="btn btn-default" onclick="this.parentNode.parentNode.remove()">Cancelar</button>
                 </div>
             `;
@@ -992,34 +1004,49 @@
             document.body.appendChild(modal);
         }
         
-        function guardarEdicionEntidad(id) {
+        function guardarEntidad(id) {
             const nombre = document.getElementById('nombre').value;
             const tipo = document.getElementById('tipo').value;
             const descripcion = document.getElementById('descripcion').value;
-            
+            const logo = document.getElementById('logo').value;
+
             if (!nombre || !tipo) {
                 mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
                 return;
             }
-            
-            // Actualizar la entidad
-            const entidad = datosActuales.entidades.find(e => e.id === id);
-            if (entidad) {
-                entidad.nombre = nombre;
-                entidad.tipo = tipo;
-                entidad.descripcion = descripcion;
-                
-                // Registrar cambio pendiente
-                cambiosPendientes[`entidad_${id}`] = true;
-                
-                // Actualizar tabla
-                mostrarTablaEntidades();
-                
-                // Cerrar modal
-                document.querySelector('div[style*="z-index: 10000"]').remove();
-                
-                mostrarNotificacion("Entidad actualizada. Recuerde guardar los cambios.");
+
+            const nuevaEntidad = {
+                id: id || Date.now(), // Generar un nuevo ID si es una nueva entidad
+                nombre,
+                tipo,
+                descripcion,
+                logo // Agregar el logo
+            };
+
+            if (id) {
+                // Editar entidad existente
+                const index = datosActuales.entidades.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    datosActuales.entidades[index] = nuevaEntidad;
+                }
+            } else {
+                // Agregar nueva entidad
+                datosActuales.entidades.push(nuevaEntidad);
             }
+
+            // Guardar cambios en la base de datos
+            guardarDatosEnAPI();
+
+            // Actualizar la tabla de entidades
+            mostrarTablaEntidades();
+
+            // Cerrar el modal
+            const modal = document.querySelector('div[style*="z-index: 10000"]');
+            if (modal) {
+                modal.remove();
+            }
+
+            mostrarNotificacion("Entidad guardada correctamente.");
         }
         
         function eliminarEntidad(id) {
@@ -1567,6 +1594,47 @@
             } catch (error) {
                 mensaje.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
             }
+        }
+
+        function guardarConflicto(id) {
+            const titulo = document.getElementById('titulo').value;
+            const subtitulo = document.getElementById('subtitulo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const fecha_inicio = document.getElementById('fecha_inicio').value;
+
+            // Validar campos
+            if (!titulo || !subtitulo || !descripcion) {
+                mostrarNotificacion("Por favor complete todos los campos obligatorios", true);
+                return;
+            }
+
+            // Crear o actualizar el conflicto
+            if (id) {
+                // Editar conflicto existente
+                const conflicto = datosActuales.conflictos.find(c => c.id === id);
+                if (conflicto) {
+                    conflicto.titulo = titulo;
+                    conflicto.subtitulo = subtitulo;
+                    conflicto.descripcion = descripcion;
+                    conflicto.fecha_inicio = fecha_inicio;
+                }
+            } else {
+                // Agregar nuevo conflicto
+                const nuevoConflicto = {
+                    id: Date.now(), // Generar un nuevo ID
+                    titulo,
+                    subtitulo,
+                    descripcion,
+                    fecha_inicio,
+                    partes_involucradas: [],
+                    cronologia: []
+                };
+                datosActuales.conflictos.push(nuevoConflicto);
+            }
+
+            // Actualizar la tabla de conflictos
+            mostrarTablaConflictos();
+            mostrarNotificacion("Conflicto guardado correctamente.");
         }
     </script>
 </body>
